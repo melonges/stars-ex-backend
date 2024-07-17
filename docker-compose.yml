@@ -10,9 +10,10 @@ services:
     env_file:
       - .env
     # Run a command against the development stage of the image
-    command: npm run start:dev
+    command: ['npm', 'run', 'start:dev', '--debug', '0.0.0.0']
     ports:
       - 3000:3000
+      - 9229:9229
     depends_on:
       - redis
       - postgres

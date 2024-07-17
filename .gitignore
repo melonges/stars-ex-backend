@@ -44,7 +44,11 @@ lerna-debug.log*
 
 # temp directory
 .temp
+/temp
 .tmp
+
+# CLI
+mikro-orm.config.js
 
 # Runtime data
 pids
