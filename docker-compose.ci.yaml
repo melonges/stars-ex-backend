@@ -3,13 +3,11 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
-      # Only will build development stage from our dockerfile
       target: production
     volumes:
       - .:/usr/src/app
     env_file:
       - .env
-    # Run a command against the development stage of the image
     command: ['npm', 'run', 'start:prod']
     ports:
       - 3000:3000
@@ -19,7 +17,7 @@ services:
       - postgres
 
   redis:
-    image: redis/redis-stack:7.2.0-v2
+    image: redis:7.2-alpine
     ports:
       - 6379:6379
       - 8001:8001
