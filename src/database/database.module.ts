@@ -1,14 +1,15 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OrmConfig } from './orm.types';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { ConfigModule } from '@nestjs/config';
+import { DatabaseService } from './database.service';
+import { DatabaseConfig } from './database.types';
 @Module({
   imports: [
     MikroOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService<OrmConfig>) => {
+      useFactory: (configService: ConfigService<DatabaseConfig>) => {
         return {
           entities: ['dist/**/*.entity.js'],
           entitiesTs: ['src/**/*.entity.ts'],
@@ -26,5 +27,6 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   exports: [MikroOrmModule],
+  providers: [DatabaseService],
 })
-export class OrmModule {}
+export class DatabaseModule {}

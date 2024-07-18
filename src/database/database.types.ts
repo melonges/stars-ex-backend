@@ -1,4 +1,4 @@
-export type OrmConfig = {
+export type DatabaseConfig = {
   POSTGRES_HOST: string;
   POSTGRES_PORT: number;
   POSTGRES_DB: string;

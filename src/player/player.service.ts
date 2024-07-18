@@ -16,6 +16,10 @@ export class PlayerService {
     return this.playerRepository.findOneOrFail({ id });
   }
 
+  async isExists(id: number): Promise<boolean> {
+    return (await this.playerRepository.count({ id })) > 0;
+  }
+
   getPlayerByRefId(refId: number): Promise<Player | null> {
     // refId is the same as player.id
     return this.playerRepository.findOne({ id: refId });
