@@ -1,9 +1,10 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Bot } from 'grammy';
+import { Bot, CommandContext, Context } from 'grammy';
 import { TelegramConfig } from './telegram.types';
 import { PlayerService } from 'src/player/player.service';
 import { ReferralService } from 'src/referral/referral.service';
+import { getReferralIdFromMatch } from './telegram.helpers';
 
 @Injectable()
 export class TelegramService implements OnApplicationBootstrap {
@@ -17,12 +18,17 @@ export class TelegramService implements OnApplicationBootstrap {
   }
 
   onApplicationBootstrap() {
-    this.bot.command('start', (ctx) => this.start(ctx.from!.id, ctx.match));
+    this.bot.command('start', this.start.bind(this));
     this.bot.start();
   }
 
-  private async start(fromId: number, refId: string) {
-    console.log(fromId, refId);
+  private async start(ctx: CommandContext<Context>) {
+    const fromId = ctx.from!.id;
+    const { ref: refId } = getReferralIdFromMatch(ctx.match);
+    console.log('refId', refId);
+    if (await this.playerService.isExists(fromId)) {
+      return;
+    }
     const newPlayer = await this.playerService.create({ id: fromId });
     if (refId && !isNaN(Number(refId))) {
       const referrer = await this.playerService.getPlayerByRefId(Number(refId));
