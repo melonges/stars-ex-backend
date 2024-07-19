@@ -25,6 +25,7 @@ import { DatabaseConfig } from './database.types';
       inject: [ConfigService],
       imports: [ConfigModule],
     }),
+    ConfigModule,
   ],
   exports: [MikroOrmModule],
   providers: [DatabaseService],
