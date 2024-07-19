@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { PlayerModule } from './player/player.module';
 import { ReferralModule } from './referral/referral.module';
 import { DatabaseModule } from './database/database.module';
+import { AssetModule } from './asset/asset.module';
+import { CacheModule } from './cache/cache.module';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -14,8 +16,10 @@ import { DatabaseModule } from './database/database.module';
     PlayerModule,
     DatabaseModule,
     ReferralModule,
+    AssetModule,
+    CacheModule,
+    EventModule,
   ],
-  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
