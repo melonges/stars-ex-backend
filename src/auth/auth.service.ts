@@ -30,6 +30,6 @@ export class AuthService {
       throw new BadRequestException("Telegram's hash is expired");
     }
     if (!isValid) throw new BadRequestException("Telegram's hash is invalid");
-    return this.playerService.findOne(parsedTgInitData.user.id);
+    return this.playerService.getPlayerByRefId(parsedTgInitData.user.id);
   }
 }
