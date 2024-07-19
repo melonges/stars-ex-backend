@@ -1,13 +1,19 @@
-import { Module } from '@nestjs/common';
-import { PlayerService } from './player.service';
-import { PlayerController } from './player.controller';
-import { Player } from './entities/player.entity';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { Module } from '@nestjs/common';
+import { Player } from './entities/player.entity';
+import { PlayerController } from './player.controller';
+import { PlayerService } from './player.service';
+import { PlayerRepository } from './player.repository';
+import { AssetModule } from 'src/asset/asset.module';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Player])],
+  imports: [
+    MikroOrmModule.forFeature([Player]),
+    AssetModule,
+    // ConfigModule.forFeature(configuration),
+  ],
   controllers: [PlayerController],
-  providers: [PlayerService],
+  providers: [PlayerService, PlayerRepository],
   exports: [PlayerService],
 })
 export class PlayerModule {}

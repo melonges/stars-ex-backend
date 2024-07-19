@@ -1,18 +1,15 @@
-import {
-  Entity,
-  EntityRepositoryType,
-  PrimaryKey,
-  Property,
-} from '@mikro-orm/core';
-import { PlayerRepository } from '../player.repository';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
-@Entity({ repository: () => PlayerRepository })
+@Entity()
 export class Player {
   @PrimaryKey()
   id: number;
 
   @Property()
   createdAt = new Date();
+
+  // @Property()
+  // lastLogin = new Date();
 
   // PERF: in the future better to increment the value than to look up all relations
   // @Property()
@@ -22,6 +19,4 @@ export class Player {
   constructor(id: number) {
     this.id = id;
   }
-
-  [EntityRepositoryType]?: PlayerRepository;
 }
