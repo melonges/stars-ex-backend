@@ -1,4 +1,4 @@
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Bot, CommandContext, Context } from 'grammy';
 import { TelegramConfig } from './telegram.types';
@@ -9,6 +9,7 @@ import { getReferralIdFromMatch } from './telegram.helpers';
 @Injectable()
 export class TelegramService implements OnApplicationBootstrap {
   private bot: Bot;
+  private readonly logger = new Logger(TelegramService.name);
   constructor(
     private configService: ConfigService<TelegramConfig>,
     private playerService: PlayerService,
@@ -25,11 +26,11 @@ export class TelegramService implements OnApplicationBootstrap {
   private async start(ctx: CommandContext<Context>) {
     const fromId = ctx.from!.id;
     const { ref: refId } = getReferralIdFromMatch(ctx.match);
-    console.log('refId', refId);
     if (await this.playerService.isExists(fromId)) {
       return;
     }
     const newPlayer = await this.playerService.create({ id: fromId });
+    this.logger.log(`New player ${fromId} registered`);
     if (refId && !isNaN(Number(refId))) {
       const referrer = await this.playerService.getPlayerByRefId(Number(refId));
       if (referrer) {
