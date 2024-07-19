@@ -1,0 +1,8 @@
+initial_state:
+  points: 5000
+  energy: 48
+  ar: 0
+limits:
+  points: 5000
+  energy: 48
+  referral: 10
