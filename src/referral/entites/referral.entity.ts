@@ -16,7 +16,7 @@ export class Referral {
   // who refers someone
   referrer: Player;
 
-  @ManyToMany()
+  @ManyToMany({ unique: true }) // being referred can only be done once
   // who is being referred
   referee: Player;
 
