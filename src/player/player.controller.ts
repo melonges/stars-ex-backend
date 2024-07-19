@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { PlayerService } from './player.service';
 import { CreatePlayerDto } from './dto/create-player.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('player')
 export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
