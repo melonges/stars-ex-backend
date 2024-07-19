@@ -14,6 +14,6 @@ export class AuthController {
   @Public()
   @Post('login')
   signIn(@Body() signInDto: TelegramInitDataDto): Promise<AccessTokenDto> {
-    return this.authService.signIn(signInDto.string);
+    return this.authService.signIn(signInDto.initData);
   }
 }
