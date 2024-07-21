@@ -6,7 +6,6 @@ import { PlayerModule } from './player/player.module';
 import { ReferralModule } from './referral/referral.module';
 import { DatabaseModule } from './database/database.module';
 import { AssetModule } from './asset/asset.module';
-import { CacheModule } from './cache/cache.module';
 import { EventModule } from './event/event.module';
 
 @Module({
@@ -17,7 +16,6 @@ import { EventModule } from './event/event.module';
     DatabaseModule,
     ReferralModule,
     AssetModule,
-    CacheModule,
     EventModule,
   ],
   providers: [AppService],
