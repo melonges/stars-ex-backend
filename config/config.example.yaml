@@ -6,3 +6,14 @@ limits:
   points: 5000
   energy: 48
   referral: 10
+passive_income:
+  points:
+    amount: 5000
+    interval: 86400000
+  energy:
+    amount: 48
+    interval: 86400000
+rewards:
+referral:
+  type: points
+  amount: 5000

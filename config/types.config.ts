@@ -19,4 +19,10 @@ export type Config = {
       interval: number;
     };
   };
+  rewards: {
+    referral: {
+      type: 'ar';
+      amount: number;
+    };
+  };
 };
