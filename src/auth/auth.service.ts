@@ -27,9 +27,9 @@ export class AuthService {
     );
     const parsedTgInitData = parseTelegramInitData(tgInitData);
     if (!isValid) throw new BadRequestException("Telegram's hash is invalid");
-    if (Date.now() / 1000 - Number(parsedTgInitData.auth_date) > 30) {
-      throw new BadRequestException("Telegram's hash is expired");
-    }
+    // if (Date.now() / 1000 - Number(parsedTgInitData.auth_date) > 30) {
+    //   throw new BadRequestException("Telegram's hash is expired");
+    // }
     return this.playerService.getPlayerByRefId(parsedTgInitData.user.id);
   }
 }
