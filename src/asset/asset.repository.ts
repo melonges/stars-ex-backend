@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Asset, AssetName } from './entities/asset.entity';
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { EntityManager, EntityRepository, wrap } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Player } from 'src/player/entities/player.entity';
 
@@ -13,6 +13,7 @@ export class AssetRepository {
   ) {}
 
   updateAsset(asset: Asset) {
+    wrap(asset).assign({ id: asset.id });
     return this.em.fork().persistAndFlush(asset);
   }
 

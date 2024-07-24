@@ -6,7 +6,7 @@ export class Asset {
   @PrimaryKey()
   id: number;
 
-  @Enum(() => AssetName)
+  @Enum({ items: () => AssetName, nativeEnumName: 'asset_name' })
   name: AssetName;
 
   @ManyToOne()

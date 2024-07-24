@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Asset, AssetName } from './entities/asset.entity';
 import { AssetRepository } from './asset.repository';
 import { Player } from 'src/player/entities/player.entity';
@@ -7,37 +7,63 @@ import { Config } from 'config/types.config';
 
 @Injectable()
 export class AssetService {
+  logger = new Logger(AssetService.name);
   constructor(
     private assetRepository: AssetRepository,
     private configService: ConfigService<Config>,
   ) {}
-  setAssetAmount(player: Player, name: AssetName, amount: number) {
-    const asset = new Asset(player, name, amount);
-    return this.assetRepository.updateAsset(asset);
+
+  add(player: Player, name: AssetName, amount: number) {
+    const asset = player.assets.find((asset) => asset.name === name);
+    if (asset) {
+      asset.amount += amount;
+    } else {
+      throw new Error(`Player ${player.id} doesn't have ${name} asset`);
+    }
   }
 
-  async registerAsset(player: Player) {
-    const points = new Asset(
-      player,
-      AssetName.POINT,
-      this.configService.getOrThrow('initial_state.points', { infer: true }),
-    );
+  take(player: Player, name: AssetName, amount: number) {
+    const asset = player.assets.find((asset) => asset.name === name);
+    if (asset) {
+      asset.amount -= amount;
+    } else {
+      throw new Error(`Player ${player.id} doesn't have ${name} asset`);
+    }
+  }
 
-    const energy = new Asset(
-      player,
-      AssetName.ENERGY,
-      this.configService.getOrThrow('initial_state.energy', { infer: true }),
-    );
+  giveReferralReward(referrer: Player, isPremiumReferee: boolean) {
+    const {
+      normal: { amount: normalReward },
+      premium: { amount: premiumReward },
+      type,
+    } = this.configService.getOrThrow('rewards.referral', { infer: true });
 
-    const arToken = new Asset(
-      player,
-      AssetName.AR,
-      this.configService.getOrThrow('initial_state.ar', { infer: true }),
+    return this.add(
+      referrer,
+      AssetName[type],
+      isPremiumReferee ? premiumReward : normalReward,
     );
+  }
 
-    [points, energy, arToken].forEach(
-      async (asset) => await this.assetRepository.registerAsset(asset),
-    );
+  getInitialAssets(player: Player) {
+    return [
+      new Asset(
+        player,
+        AssetName.POINT,
+        this.configService.getOrThrow('initial_state.points', { infer: true }),
+      ),
+
+      new Asset(
+        player,
+        AssetName.ENERGY,
+        this.configService.getOrThrow('initial_state.energy', { infer: true }),
+      ),
+      new Asset(
+        player,
+        AssetName.AR,
+        this.configService.getOrThrow('initial_state.ar', { infer: true }),
+      ),
+    ];
   }
 
   getAsset(player: Player, name: AssetName) {
