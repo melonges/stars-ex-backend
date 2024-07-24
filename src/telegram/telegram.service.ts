@@ -27,7 +27,9 @@ export class TelegramService implements OnApplicationBootstrap {
           inline_keyboard: [
             [
               {
-                web_app: { url: 'https://ambeaver.serveo.net' },
+                web_app: {
+                  url: this.configService.getOrThrow('DEV_WEB_APP_URL'),
+                },
                 text: 'ambeaver',
               },
             ],
