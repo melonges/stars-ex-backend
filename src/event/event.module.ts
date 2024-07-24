@@ -4,9 +4,10 @@ import { EventController } from './event.controller';
 import { PlayerModule } from 'src/player/player.module';
 import { AssetModule } from 'src/asset/asset.module';
 import { ConfigModule } from '@nestjs/config';
+import configuration from 'config/configuration';
 
 @Module({
-  imports: [PlayerModule, AssetModule, ConfigModule],
+  imports: [PlayerModule, AssetModule, ConfigModule.forFeature(configuration)],
   controllers: [EventController],
   providers: [EventService],
 })
