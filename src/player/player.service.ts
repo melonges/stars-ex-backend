@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { Player } from './entities/player.entity';
 import { AssetService } from 'src/asset/asset.service';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager, FindOneOptions } from '@mikro-orm/postgresql';
 
 @Injectable()
 export class PlayerService {
@@ -19,10 +19,11 @@ export class PlayerService {
     return player;
   }
 
-  getPlayer(id: number): Promise<Player | null> {
-    return this.em
-      .getRepository(Player)
-      .findOne({ id }, { populate: ['assets', 'referrals'] });
+  getPlayer(
+    id: number,
+    options?: FindOneOptions<Player, 'ZOV'>,
+  ): Promise<Player | null> {
+    return this.em.getRepository(Player).findOne({ id }, options);
   }
 
   getPlayerUnsafe(id: number): Promise<Player> {
@@ -34,6 +35,6 @@ export class PlayerService {
   }
 
   getPlayerByRefId(refId: number): Promise<Player | null> {
-    return this.getPlayer(refId);
+    return this.getPlayer(refId, { populate: ['assets'] });
   }
 }
