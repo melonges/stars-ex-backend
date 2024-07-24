@@ -20,6 +20,21 @@ export class TelegramService implements OnApplicationBootstrap {
 
   onApplicationBootstrap() {
     this.bot.command('start', this.start.bind(this));
+    // TODO: remove
+    this.bot.command('dev', (ctx) =>
+      ctx.reply('app', {
+        reply_markup: {
+          keyboard: [
+            [
+              {
+                web_app: { url: 'https://ambeaver.serveo.net' },
+                text: 'ambeaver',
+              },
+            ],
+          ],
+        },
+      }),
+    );
     this.bot.start();
   }
 
