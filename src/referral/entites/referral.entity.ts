@@ -1,7 +1,8 @@
 import {
   Entity,
   EntityRepositoryType,
-  ManyToMany,
+  ManyToOne,
+  OneToOne,
   PrimaryKey,
 } from '@mikro-orm/core';
 import { Player } from 'src/player/entities/player.entity';
@@ -12,11 +13,11 @@ export class Referral {
   @PrimaryKey()
   id: number;
 
-  @ManyToMany()
+  @ManyToOne()
   // who refers someone
   referrer: Player;
 
-  @ManyToMany({ unique: true }) // being referred can only be done once
+  @OneToOne({ unique: true }) // being referred can only be done once
   // who is being referred
   referee: Player;
 

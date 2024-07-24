@@ -1,22 +1,23 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  EntityRepositoryType,
+  OneToMany,
+} from '@mikro-orm/core';
+import { Asset } from 'src/asset/entities/asset.entity';
+import { BaseEntity } from 'src/common/base.entity';
+import { Referral } from 'src/referral/entites/referral.entity';
+import { PlayerRepository } from '../player.repository';
 
-@Entity()
-export class Player {
-  @PrimaryKey()
-  id: number;
-
-  @Property()
-  createdAt = new Date();
-
-  // @Property()
-  // lastLogin = new Date();
-
-  // PERF: in the future better to increment the value than to look up all relations
-  // @Property()
-  // referralAmount: number;
-  //
-  //
+@Entity({ repository: () => PlayerRepository })
+export class Player extends BaseEntity {
+  [EntityRepositoryType]?: PlayerRepository;
+  @OneToMany(() => Asset, (asset) => asset.player)
+  assets = new Collection<Asset>(this);
   constructor(id: number) {
-    this.id = id;
+    super(id);
   }
+
+  @OneToMany(() => Referral, (referral) => referral.referrer)
+  referrals = new Collection<Referral>(this);
 }

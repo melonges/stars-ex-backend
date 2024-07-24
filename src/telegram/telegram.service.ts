@@ -5,6 +5,8 @@ import { TelegramConfig } from './telegram.types';
 import { PlayerService } from 'src/player/player.service';
 import { ReferralService } from 'src/referral/referral.service';
 import { getReferralIdFromMatch } from './telegram.helpers';
+import { EnsureRequestContext, EntityManager } from '@mikro-orm/postgresql';
+import { AssetService } from 'src/asset/asset.service';
 
 @Injectable()
 export class TelegramService implements OnApplicationBootstrap {
@@ -14,6 +16,8 @@ export class TelegramService implements OnApplicationBootstrap {
     private configService: ConfigService<TelegramConfig>,
     private playerService: PlayerService,
     private referralService: ReferralService,
+    private assetService: AssetService,
+    private em: EntityManager,
   ) {
     this.bot = new Bot(this.configService.getOrThrow('TELEGRAM_TOKEN'));
   }
@@ -40,19 +44,41 @@ export class TelegramService implements OnApplicationBootstrap {
     this.bot.start();
   }
 
+  private welcome(ctx: CommandContext<Context>) {
+    return ctx.reply('Welcome to Ambeaver', {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              web_app: {
+                url: this.configService.getOrThrow('WEB_APP_URL'),
+              },
+              text: 'ambeaver app',
+            },
+          ],
+        ],
+      },
+    });
+  }
+
+  @EnsureRequestContext()
   private async start(ctx: CommandContext<Context>) {
     const fromId = ctx.from!.id;
     const { ref: refId } = getReferralIdFromMatch(ctx.match);
     if (await this.playerService.isExists(fromId)) {
-      return;
+      return await this.welcome(ctx);
     }
-    const newPlayer = await this.playerService.create({ id: fromId });
-    this.logger.log(`New player ${fromId} registered`);
+    const newPlayer = this.playerService.create({ id: fromId });
     if (refId && !isNaN(Number(refId))) {
       const referrer = await this.playerService.getPlayerByRefId(Number(refId));
       if (referrer) {
-        await this.referralService.addReferralRecord(referrer, newPlayer);
+        const isPremiumNewPlayer = Boolean(ctx.from?.is_premium);
+        this.referralService.addNewReferral(referrer, newPlayer);
+        this.assetService.giveReferralReward(referrer, isPremiumNewPlayer);
       }
     }
+    await this.em.persistAndFlush(newPlayer);
+    this.logger.log(`New player ${fromId} registered`);
+    await this.welcome(ctx);
   }
 }
