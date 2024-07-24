@@ -24,7 +24,7 @@ export class TelegramService implements OnApplicationBootstrap {
     this.bot.command('dev', (ctx) =>
       ctx.reply('app', {
         reply_markup: {
-          keyboard: [
+          inline_keyboard: [
             [
               {
                 web_app: { url: 'https://ambeaver.serveo.net' },
