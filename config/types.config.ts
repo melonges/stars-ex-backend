@@ -21,8 +21,13 @@ export type Config = {
   };
   rewards: {
     referral: {
-      type: 'ar';
-      amount: number;
+      type: 'AR' | 'ENERGY' | 'POINT';
+      premium: {
+        amount: number;
+      };
+      normal: {
+        amount: number;
+      };
     };
   };
 };
