@@ -21,6 +21,7 @@ export class ReferralController {
     @PlayerId() id: number,
     @Query() options: PaginationDto,
   ): Promise<PaginatedResponse<ReferralDto>> {
+    debugger;
     return this.referralRepository.getReferrals(id, options);
   }
 }
