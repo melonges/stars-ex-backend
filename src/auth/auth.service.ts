@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { TelegramConfig } from 'src/telegram/telegram.types';
 import { Player } from 'src/player/entities/player.entity';
 import { JwtService } from '@nestjs/jwt';
+import { ParsedTelegramInitData } from './auth.types';
 
 @Injectable()
 export class AuthService {
@@ -15,21 +16,30 @@ export class AuthService {
   ) {}
 
   async signIn(data: string): Promise<{ access_token: string }> {
-    const player = await this.signInByTelegramInitData(data);
+    const [player, tgInitData] = await this.signInByTelegramInitData(data);
+    if (!player) throw new BadRequestException('Telegram is not registered');
+    this.playerService.actualize(player, tgInitData);
     const payload = { sub: player.id };
     return { access_token: await this.jwtService.signAsync(payload) };
   }
 
-  private async signInByTelegramInitData(tgInitData: string): Promise<Player> {
+  private async signInByTelegramInitData(
+    tgInitData: string,
+  ): Promise<[player: Player | null, tgInitData: ParsedTelegramInitData]> {
     const isValid = await isValidTgInitData(
       tgInitData,
       this.configService.getOrThrow('TELEGRAM_TOKEN'),
     );
-    const parsedTgInitData = parseTelegramInitData(tgInitData);
     if (!isValid) throw new BadRequestException("Telegram's hash is invalid");
+    const parsedTgInitData = parseTelegramInitData(tgInitData);
     if (Date.now() / 1000 - Number(parsedTgInitData.auth_date) > 86400) {
       throw new BadRequestException("Telegram's hash is expired");
     }
-    return this.playerService.getPlayerUnsafe(parsedTgInitData.user.id);
+    return [
+      await this.playerService.getPlayer(parsedTgInitData.user.id, {
+        populate: ['assets'],
+      }),
+      parsedTgInitData,
+    ];
   }
 }

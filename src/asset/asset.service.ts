@@ -13,6 +13,29 @@ export class AssetService {
     private configService: ConfigService<Config>,
   ) {}
 
+  actualize(player: Player) {
+    const points = this.getAssetSync(player, AssetName.POINT);
+    if (!points) {
+      throw new Error(
+        `Player ${player.id} doesn't have ${AssetName.POINT} asset`,
+      );
+    }
+
+    const { amount: passivePoints, interval: passivePointsInterval } =
+      this.configService.getOrThrow('passive_income.points', { infer: true });
+
+    if (Date.now() - points.updatedAt.getTime() > passivePointsInterval) {
+      points.amount = Math.min(
+        this.configService.getOrThrow('limits.points', { infer: true }),
+        points.amount + passivePoints,
+      );
+    }
+  }
+
+  getAssetSync(player: Player, name: AssetName) {
+    return player.assets.find((asset) => asset.name === name);
+  }
+
   add(player: Player, name: AssetName, amount: number) {
     const asset = player.assets.find((asset) => asset.name === name);
     if (asset) {

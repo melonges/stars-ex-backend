@@ -3,6 +3,7 @@ import {
   Entity,
   EntityRepositoryType,
   OneToMany,
+  Property,
 } from '@mikro-orm/core';
 import { Asset } from 'src/asset/entities/asset.entity';
 import { BaseEntity } from 'src/common/base.entity';
@@ -11,7 +12,8 @@ import { PlayerRepository } from '../player.repository';
 
 @Entity({ repository: () => PlayerRepository })
 export class Player extends BaseEntity {
-  [EntityRepositoryType]?: PlayerRepository;
+  @Property()
+  username?: string;
   @OneToMany(() => Asset, (asset) => asset.player)
   assets = new Collection<Asset>(this);
   constructor(id: number) {
@@ -20,4 +22,6 @@ export class Player extends BaseEntity {
 
   @OneToMany(() => Referral, (referral) => referral.referrer)
   referrals = new Collection<Referral>(this);
+
+  [EntityRepositoryType]?: PlayerRepository;
 }

@@ -36,15 +36,7 @@ export class EventService {
       throw new InternalServerErrorException();
     }
 
-    const { amount: passivePoints, interval: passivePointsInterval } =
-      this.configService.getOrThrow('passive_income.points', { infer: true });
-
-    if (Date.now() - points.updatedAt.getTime() > passivePointsInterval) {
-      points.amount = Math.min(
-        this.configService.getOrThrow('limits.points', { infer: true }),
-        points.amount + passivePoints,
-      );
-    }
+    this.assetService.actualize(player);
 
     if (points.amount < tapEventDto.amount) {
       throw new BadRequestException('Not enough points');
