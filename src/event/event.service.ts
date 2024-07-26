@@ -24,7 +24,9 @@ export class EventService {
 
   @EnsureRequestContext()
   async registerTap(playerId: number, tapEventDto: TapEventDto) {
-    const player = await this.playerService.getPlayer(playerId);
+    const player = await this.playerService.getPlayer(playerId, {
+      populate: ['assets'],
+    });
     if (!player) {
       throw new UnauthorizedException();
     }
