@@ -1,6 +1,6 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { AssetService } from './asset.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PlayerId } from 'src/common/decorators/player-id.decorator';
 import { PlayerAssetsDto } from './dto/player-assets.dto';
 import { AssetName } from './entities/asset.entity';
@@ -29,6 +29,7 @@ export class AssetController {
   }
 
   @Post('charge-points')
+  @ApiBadRequestResponse({ description: 'Not enough energy' })
   chargePoints(@PlayerId() id: number) {
     this.assetService.chargePoints(id);
   }

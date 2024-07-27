@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Asset, AssetName } from './entities/asset.entity';
 import { AssetRepository } from './asset.repository';
 import { Player } from 'src/player/entities/player.entity';
@@ -71,6 +71,15 @@ export class AssetService {
     const energy = asset.find((asset) => asset.name === AssetName.ENERGY);
     if (!points || !energy) {
       throw new Error(`Player ${playerId} doesn't have needed asset`);
+    }
+
+    if (
+      energy.amount <
+      this.configService.getOrThrow('price.recovery.points.amount', {
+        infer: true,
+      })
+    ) {
+      throw new BadRequestException('Not enough energy');
     }
     points.amount = this.configService.getOrThrow('initial_state.points', {
       infer: true,
