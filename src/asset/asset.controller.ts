@@ -28,7 +28,7 @@ export class AssetController {
     };
   }
 
-  @Post()
+  @Post('charge-points')
   chargePoints(@PlayerId() id: number) {
     this.assetService.chargePoints(id);
   }
