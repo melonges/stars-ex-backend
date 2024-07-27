@@ -4,6 +4,8 @@ import { AssetRepository } from './asset.repository';
 import { Player } from 'src/player/entities/player.entity';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'config/types.config';
+import { EntityManager } from '@mikro-orm/core';
+import { RemainingTimeDto } from './dto/remaining-time.dto';
 
 @Injectable()
 export class AssetService {
@@ -11,18 +13,20 @@ export class AssetService {
   constructor(
     private assetRepository: AssetRepository,
     private configService: ConfigService<Config>,
+    private em: EntityManager,
   ) {}
 
   actualize(player: Player) {
     const points = this.getAssetSync(player, AssetName.POINT);
-    if (!points) {
-      throw new Error(
-        `Player ${player.id} doesn't have ${AssetName.POINT} asset`,
-      );
+    const energy = this.getAssetSync(player, AssetName.ENERGY);
+    if (!points || !energy) {
+      throw new Error(`Player ${player.id} doesn't have needed asset`);
     }
 
-    const { amount: passivePoints, interval: passivePointsInterval } =
-      this.configService.getOrThrow('passive_income.points', { infer: true });
+    const {
+      points: { amount: passivePoints, interval: passivePointsInterval },
+      energy: { amount: passiveEnergy, interval: passiveEnergyInterval },
+    } = this.configService.getOrThrow('passive_income', { infer: true });
 
     if (Date.now() - points.updatedAt.getTime() > passivePointsInterval) {
       points.amount = Math.min(
@@ -30,6 +34,55 @@ export class AssetService {
         points.amount + passivePoints,
       );
     }
+
+    if (Date.now() - energy.updatedAt.getTime() > passiveEnergyInterval) {
+      energy.amount = Math.min(
+        this.configService.getOrThrow('limits.energy', { infer: true }),
+        energy.amount + passiveEnergy,
+      );
+    }
+  }
+
+  async getTimeToFullEnergy(playerId: number): Promise<RemainingTimeDto> {
+    const assets = await this.assetRepository.getAssetsByPlayerId(playerId);
+    const energy = assets.find((asset) => asset.name === AssetName.ENERGY);
+    if (!energy) {
+      throw new Error(`Player ${playerId} doesn't have needed asset`);
+    }
+    if (
+      energy.amount ==
+      this.configService.getOrThrow('limits.energy', {
+        infer: true,
+      })
+    ) {
+      return { remainingTime: 0 };
+    }
+
+    const elapsedTime = Date.now() - energy.updatedAt.getTime();
+
+    return {
+      remainingTime: elapsedTime,
+    };
+  }
+
+  async chargePoints(playerId: number) {
+    const asset = await this.assetRepository.getAssetsByPlayerId(playerId);
+    const points = asset.find((asset) => asset.name === AssetName.POINT);
+    const energy = asset.find((asset) => asset.name === AssetName.ENERGY);
+    if (!points || !energy) {
+      throw new Error(`Player ${playerId} doesn't have needed asset`);
+    }
+    points.amount = this.configService.getOrThrow('initial_state.points', {
+      infer: true,
+    });
+
+    energy.amount -= this.configService.getOrThrow(
+      'price.recovery.points.amount',
+      {
+        infer: true,
+      },
+    );
+    await this.em.flush();
   }
 
   getAssetSync(player: Player, name: AssetName) {

@@ -14,6 +14,14 @@ passive_income:
     amount: 48
     interval: 86400000
 rewards:
-referral:
-  type: points
-  amount: 5000
+  referral:
+    type: AR
+    premium:
+      amount: 10000
+    normal:
+      amount: 5000
+price:
+  recovery:
+    points:
+      amount: 4
+      type: ENERGY

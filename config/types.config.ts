@@ -1,3 +1,4 @@
+type Asset = 'AR' | 'ENERGY' | 'POINT';
 export type Config = {
   initial_state: {
     points: number;
@@ -21,12 +22,20 @@ export type Config = {
   };
   rewards: {
     referral: {
-      type: 'AR' | 'ENERGY' | 'POINT';
+      type: Asset;
       premium: {
         amount: number;
       };
       normal: {
         amount: number;
+      };
+    };
+  };
+  price: {
+    recovery: {
+      points: {
+        amount: 4;
+        type: Asset;
       };
     };
   };

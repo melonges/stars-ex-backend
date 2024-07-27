@@ -1,9 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { AssetService } from './asset.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PlayerId } from 'src/common/decorators/player-id.decorator';
 import { PlayerAssetsDto } from './dto/player-assets.dto';
 import { AssetName } from './entities/asset.entity';
+import { RemainingTimeDto } from './dto/remaining-time.dto';
 
 @ApiBearerAuth()
 @ApiTags('Asset')
@@ -25,5 +26,15 @@ export class AssetController {
         .filter((asset) => asset.name === AssetName.AR)
         .reduce((sum, asset) => sum + asset.amount, 0),
     };
+  }
+
+  @Post()
+  chargePoints(@PlayerId() id: number) {
+    this.assetService.chargePoints(id);
+  }
+
+  @Get('time-to-full-energy')
+  getTimeToFullEnergy(@PlayerId() id: number): Promise<RemainingTimeDto> {
+    return this.assetService.getTimeToFullEnergy(id);
   }
 }
