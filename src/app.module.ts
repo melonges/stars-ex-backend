@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { PlayerModule } from './player/player.module';
@@ -18,6 +17,5 @@ import { EventModule } from './event/event.module';
     AssetModule,
     EventModule,
   ],
-  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
