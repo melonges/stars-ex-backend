@@ -23,7 +23,7 @@ export class PaginationDto {
   @IsNumber()
   @Min(0)
   @Type(() => Number)
-  @ApiProperty()
+  @ApiProperty({ description: 'page pagination starts from 0' })
   page: number;
 
   @IsNumber()
