@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Referral } from './entites/referral.entity';
 import { Player } from 'src/player/entities/player.entity';
 import { TelegramService } from 'src/telegram/telegram.service';
 
 @Injectable()
 export class ReferralService {
-  constructor(private telegramService: TelegramService) {}
+  constructor(
+    @Inject(forwardRef(() => TelegramService))
+    private telegramService: TelegramService,
+  ) {}
   addNewReferral(referrer: Player, referee: Player) {
     const newReferral = new Referral(referrer, referee);
     referrer.referrals.add(newReferral);

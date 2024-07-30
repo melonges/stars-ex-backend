@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { ConfigModule } from '@nestjs/config';
 import { ReferralModule } from 'src/referral/referral.module';
@@ -9,7 +9,7 @@ import { AssetModule } from 'src/asset/asset.module';
 @Module({
   imports: [
     ConfigModule,
-    ReferralModule,
+    forwardRef(() => ReferralModule),
     PlayerModule,
     MikroOrmModule,
     AssetModule,

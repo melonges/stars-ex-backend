@@ -29,7 +29,7 @@ export class ReferralController {
     return this.referralRepository.getReferrals(id, options);
   }
 
-  @Get()
+  @Get('link')
   getReferralLink(@PlayerId() id: number): ReferralLinkDto {
     return { link: this.referralService.getReferralLink(id) };
   }

@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Bot, CommandContext, Context } from 'grammy';
 import { TelegramConfig } from './telegram.types';
@@ -15,6 +21,7 @@ export class TelegramService implements OnApplicationBootstrap {
   constructor(
     private configService: ConfigService<TelegramConfig>,
     private playerService: PlayerService,
+    @Inject(forwardRef(() => ReferralService))
     private referralService: ReferralService,
     private assetService: AssetService,
     private em: EntityManager,
