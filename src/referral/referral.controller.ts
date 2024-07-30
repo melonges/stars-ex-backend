@@ -8,12 +8,17 @@ import {
   PaginationDto,
 } from 'src/common/swagger/pagination';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ReferralLinkDto } from './dto/referral-link.dto';
+import { ReferralService } from './referral.service';
 
 @ApiBearerAuth()
 @ApiTags('Referral')
 @Controller('referral')
 export class ReferralController {
-  constructor(private readonly referralRepository: ReferralRepository) {}
+  constructor(
+    private readonly referralRepository: ReferralRepository,
+    private referralService: ReferralService,
+  ) {}
 
   @Get()
   @ApiPaginatedResponse(ReferralDto)
@@ -21,7 +26,11 @@ export class ReferralController {
     @PlayerId() id: number,
     @Query() options: PaginationDto,
   ): Promise<PaginatedResponse<ReferralDto>> {
-    debugger;
     return this.referralRepository.getReferrals(id, options);
+  }
+
+  @Get()
+  getReferralLink(@PlayerId() id: number): ReferralLinkDto {
+    return { link: this.referralService.getReferralLink(id) };
   }
 }

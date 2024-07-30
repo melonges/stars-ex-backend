@@ -21,7 +21,6 @@ export class TelegramService implements OnApplicationBootstrap {
   ) {
     this.bot = new Bot(this.configService.getOrThrow('TELEGRAM_TOKEN'));
   }
-
   onApplicationBootstrap() {
     this.bot.command('start', this.start.bind(this));
     // TODO: remove
@@ -42,6 +41,13 @@ export class TelegramService implements OnApplicationBootstrap {
       }),
     );
     this.bot.start();
+  }
+
+  getBotUserName(): string {
+    if (!this.bot.isInited()) {
+      throw new Error('Bot is not inited');
+    }
+    return this.bot.botInfo.username;
   }
 
   private welcome(ctx: CommandContext<Context>) {

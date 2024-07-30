@@ -15,5 +15,6 @@ import { AssetModule } from 'src/asset/asset.module';
     AssetModule,
   ],
   providers: [TelegramService],
+  exports: [TelegramService],
 })
 export class TelegramModule {}
