@@ -37,23 +37,22 @@ export class EventService {
       (asset) => asset.name === AssetName.POINT,
     );
     const ar = player.assets.find((asset) => asset.name === AssetName.AR);
+
     if (!points || !ar) {
       throw new InternalServerErrorException();
     }
 
-    this.assetService.actualize(player);
+    const { points: pointsPriceInTap, ar: arPriceInTap } =
+      this.configService.getOrThrow('price.tap', { infer: true });
+    const tapAmountInPoints = tapEventDto.amount * pointsPriceInTap.amount;
 
-    if (points.amount < tapEventDto.amount) {
+    if (points.amount < tapAmountInPoints) {
       throw new BadRequestException('Not enough points');
     }
 
-    const { points: pointsPrice, ar: arPrice } = this.configService.getOrThrow(
-      'price.tap',
-      { infer: true },
-    );
-
-    points.amount -= tapEventDto.amount * pointsPrice.amount;
-    ar.amount += tapEventDto.amount * arPrice.amount;
+    points.amount -= tapAmountInPoints;
+    ar.amount += tapEventDto.amount * arPriceInTap.amount;
+    this.assetService.actualize(player);
     await this.em.flush();
   }
 }
