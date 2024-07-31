@@ -37,8 +37,11 @@ export class EventService {
       (asset) => asset.name === AssetName.POINT,
     );
     const ar = player.assets.find((asset) => asset.name === AssetName.AR);
+    const totalTapped = player.assets.find(
+      (asset) => asset.name === AssetName.TOTAL_TAPED,
+    );
 
-    if (!points || !ar) {
+    if (!points || !ar || !totalTapped) {
       throw new InternalServerErrorException();
     }
 
@@ -52,6 +55,7 @@ export class EventService {
 
     points.amount -= tapAmountInPoints;
     ar.amount += tapEventDto.amount * arPriceInTap.amount;
+    totalTapped.amount++;
     this.assetService.actualize(player);
     await this.em.flush();
   }

@@ -29,4 +29,5 @@ export enum AssetName {
   AR = 'AR',
   ENERGY = 'ENERGY',
   POINT = 'POINT',
+  TOTAL_TAPED = 'TOTAL_TAPED',
 }
