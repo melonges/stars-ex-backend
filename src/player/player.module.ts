@@ -14,6 +14,6 @@ import { AssetModule } from 'src/asset/asset.module';
   ],
   controllers: [PlayerController],
   providers: [PlayerService, PlayerRepository],
-  exports: [PlayerService],
+  exports: [PlayerService, PlayerRepository],
 })
 export class PlayerModule {}

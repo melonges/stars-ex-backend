@@ -120,12 +120,11 @@ export class AssetService {
     const {
       normal: { amount: normalReward },
       premium: { amount: premiumReward },
-      type,
     } = this.configService.getOrThrow('rewards.referral', { infer: true });
 
     return this.add(
       referrer,
-      AssetName[type],
+      AssetName.AR,
       isPremiumReferee ? premiumReward : normalReward,
     );
   }

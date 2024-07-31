@@ -8,7 +8,7 @@ import { AssetModule } from 'src/asset/asset.module';
 
 @Module({
   imports: [
-    ConfigModule,
+    ConfigModule.forRoot({ cache: true }),
     forwardRef(() => ReferralModule),
     PlayerModule,
     MikroOrmModule,

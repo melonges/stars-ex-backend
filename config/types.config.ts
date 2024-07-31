@@ -1,4 +1,3 @@
-type Asset = 'AR' | 'ENERGY' | 'POINT';
 export type Config = {
   initial_state: {
     points: number;
@@ -8,7 +7,7 @@ export type Config = {
   limits: {
     points: number;
     energy: number;
-    referral: 48;
+    referral: number;
   };
   passive_income: {
     points: {
@@ -22,7 +21,6 @@ export type Config = {
   };
   rewards: {
     referral: {
-      type: Asset;
       premium: {
         amount: number;
       };
@@ -34,8 +32,15 @@ export type Config = {
   price: {
     recovery: {
       points: {
-        amount: 4;
-        type: Asset;
+        amount: number;
+      };
+    };
+    tap: {
+      points: {
+        amount: number;
+      };
+      ar: {
+        amount: number;
       };
     };
   };
