@@ -6,6 +6,7 @@ import { ReferralModule } from './referral/referral.module';
 import { DatabaseModule } from './database/database.module';
 import { AssetModule } from './asset/asset.module';
 import { EventModule } from './event/event.module';
+import { SettingModule } from './setting/setting.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EventModule } from './event/event.module';
     ReferralModule,
     AssetModule,
     EventModule,
+    SettingModule,
   ],
 })
 export class AppModule {}
