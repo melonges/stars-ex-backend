@@ -81,7 +81,11 @@ export class TelegramService implements OnApplicationBootstrap {
     if (await this.playerService.isExists(fromId)) {
       return await this.welcome(ctx);
     }
-    const newPlayer = this.playerService.create({ id: fromId });
+    //TODO: check on bot
+    const newPlayer = this.playerService.create({
+      id: fromId,
+      username: ctx.from?.username,
+    });
     if (refId && !isNaN(Number(refId))) {
       const referrer = await this.playerService.getPlayerByRefId(Number(refId));
       if (referrer) {

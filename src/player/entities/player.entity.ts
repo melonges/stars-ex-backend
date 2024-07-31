@@ -16,8 +16,9 @@ export class Player extends BaseEntity {
   username?: string;
   @OneToMany(() => Asset, (asset) => asset.player)
   assets = new Collection<Asset>(this);
-  constructor(id: number) {
+  constructor(id: number, username?: string) {
     super(id);
+    this.username = username;
   }
 
   @OneToMany(() => Referral, (referral) => referral.referrer)

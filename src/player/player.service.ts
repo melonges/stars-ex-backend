@@ -12,7 +12,7 @@ export class PlayerService {
     private em: EntityManager,
   ) {}
   create(createPlayerDto: CreatePlayerDto) {
-    const player = new Player(createPlayerDto.id);
+    const player = new Player(createPlayerDto.id, createPlayerDto.username);
     this.assetService
       .getInitialAssets(player)
       .forEach((asset) => player.assets.add(asset));
