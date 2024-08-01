@@ -5,16 +5,25 @@ import { PlayerId } from 'src/common/decorators/player-id.decorator';
 import { PlayerAssetsDto } from './dto/player-assets.dto';
 import { AssetName } from './entities/asset.entity';
 import { RemainingTimeDto } from './dto/remaining-time.dto';
+import { PlayerRepository } from 'src/player/player.repository';
 
 @ApiBearerAuth()
 @ApiTags('Asset')
 @Controller('asset')
 export class AssetController {
-  constructor(private readonly assetService: AssetService) {}
+  constructor(
+    private readonly assetService: AssetService,
+    private playerRepository: PlayerRepository,
+  ) {}
 
   @Get()
   async getPlayerAssets(@PlayerId() id: number): Promise<PlayerAssetsDto> {
-    const assets = await this.assetService.getAssets(id);
+    const player = await this.playerRepository.findOneOrFail(
+      { id },
+      { populate: ['assets'] },
+    );
+    this.assetService.actualize(player);
+    const assets = await this.assetService.getAssets(player);
     return {
       points: assets
         .filter((asset) => asset.name === AssetName.POINT)

@@ -6,11 +6,12 @@ import configuration from 'config/configuration';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Asset } from './entities/asset.entity';
 import { AssetRepository } from './asset.repository';
+import { Player } from 'src/player/entities/player.entity';
 
 @Module({
   imports: [
     ConfigModule.forFeature(configuration),
-    MikroOrmModule.forFeature([Asset]),
+    MikroOrmModule.forFeature([Asset, Player]),
   ],
   controllers: [AssetController],
   providers: [AssetService, AssetRepository],
