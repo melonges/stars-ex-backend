@@ -35,7 +35,7 @@ export class AssetController {
         .filter((asset) => asset.name === AssetName.AR)
         .reduce((sum, asset) => sum + asset.amount, 0),
       totalTaps: assets
-        .filter((asset) => asset.name === AssetName.AR)
+        .filter((asset) => asset.name === AssetName.TOTAL_TAPED)
         .reduce((sum, asset) => sum + asset.amount, 0),
     };
   }
