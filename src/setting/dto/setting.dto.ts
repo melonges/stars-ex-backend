@@ -19,4 +19,8 @@ export class SettingDto {
       };
     };
   };
+  referralReward: {
+    normal: { amount: number };
+    premium: { amount: number };
+  };
 }

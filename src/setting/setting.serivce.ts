@@ -9,8 +9,11 @@ export class SettingService {
 
   getSetting(_: number): SettingDto {
     _;
-    const price = this.configService.getOrThrow('price');
-    const limits = this.configService.getOrThrow('limits');
-    return { limits, price };
+    const price = this.configService.getOrThrow('price', { infer: true });
+    const limits = this.configService.getOrThrow('limits', { infer: true });
+    const { referral } = this.configService.getOrThrow('rewards', {
+      infer: true,
+    });
+    return { limits, price, referralReward: referral };
   }
 }
