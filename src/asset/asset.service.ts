@@ -147,11 +147,6 @@ export class AssetService {
         AssetName.AR,
         this.configService.getOrThrow('initial_state.ar', { infer: true }),
       ),
-      new Asset(
-        player,
-        AssetName.AR,
-        this.configService.getOrThrow('initial_state.ar', { infer: true }),
-      ),
       new Asset(player, AssetName.TOTAL_TAPED, 0),
     ];
   }
