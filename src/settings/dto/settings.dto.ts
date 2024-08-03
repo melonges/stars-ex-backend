@@ -1,4 +1,4 @@
-export class SettingDto {
+export class SettingsDto {
   limits: {
     points: number;
     energy: number;
