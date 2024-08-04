@@ -30,7 +30,6 @@ services:
   #     - internal
   postgres:
     image: postgres:16.2-alpine
-    restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
