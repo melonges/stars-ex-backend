@@ -13,6 +13,13 @@ export class Task extends BaseEntity {
   reward: number;
   @Enum({ items: () => AssetName, nativeEnumName: NativeEnumName.ASSET })
   currency: AssetName;
+  @Enum({ items: () => TaskType, nativeEnumName: NativeEnumName.TASK_TYPE })
+  type: TaskType;
+  @Property({ type: 'jsonb' })
+  /*
+   * Meta of task in json
+   */
+  meta: string;
 }
 
 @Entity()
@@ -28,4 +35,10 @@ export class TaskStatus extends BaseEntity {
 export enum TaskStatusEnum {
   FULFILLED = 'fulfilled',
   CLAIMED = 'claimed',
+}
+
+export enum TaskType {
+  WELCOME = 'welcome',
+  INVITE = 'invite',
+  SUBSCRIBE = 'subscribe',
 }
