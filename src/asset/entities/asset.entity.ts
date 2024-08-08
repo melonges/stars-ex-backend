@@ -1,4 +1,5 @@
 import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { NativeEnumName } from 'src/database/tative-enum-name';
 import { Player } from 'src/player/entities/player.entity';
 
 @Entity()
@@ -6,7 +7,10 @@ export class Asset {
   @PrimaryKey()
   id: number;
 
-  @Enum({ items: () => AssetName, nativeEnumName: 'asset_name' })
+  @Enum({
+    items: () => AssetName,
+    nativeEnumName: NativeEnumName.ASSET,
+  })
   name: AssetName;
 
   @ManyToOne()

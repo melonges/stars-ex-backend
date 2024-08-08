@@ -55,7 +55,7 @@ export class EventService {
 
     points.amount -= tapAmountInPoints;
     ar.amount += tapEventDto.amount * arPriceInTap.amount;
-    totalTapped.amount++;
+    totalTapped.amount += tapEventDto.amount;
     this.assetService.actualize(player);
     await this.em.flush();
   }

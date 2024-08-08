@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { AssetModule } from './asset/asset.module';
 import { EventModule } from './event/event.module';
 import { SettingsModule } from './settings/settings.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SettingsModule } from './settings/settings.module';
     AssetModule,
     EventModule,
     SettingsModule,
+    TasksModule,
   ],
 })
 export class AppModule {}
