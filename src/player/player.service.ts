@@ -18,17 +18,17 @@ export class PlayerService {
       id,
       username,
       totalTapped: { amount: totalTapped },
-      points: { amount: points, player: id },
-      energy: { amount: energy, player: id },
-      ambers: { amount: ambers, player: id },
+      points: { amount: points },
+      energy: { amount: energy },
+      ambers: { amount: ambers },
     });
     return player;
   }
 
-  actualize(player: Player, tgInitData?: ParsedTelegramInitData) {
-    this.assetService.actualize(player);
-    if (tgInitData) {
+  async actualize(player: Player, tgInitData?: ParsedTelegramInitData) {
+    if (tgInitData && tgInitData.user.username != player.username) {
       player.username = tgInitData.user.username;
+      await this.em.flush();
     }
   }
 
