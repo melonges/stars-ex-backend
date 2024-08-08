@@ -21,23 +21,21 @@ export class AssetService {
       throw new Error(`Player ${id} doesn't have needed asset`);
     }
 
-    const {
-      points: { amount: passivePoints, interval: passivePointsInterval },
-      energy: { amount: passiveEnergy, interval: passiveEnergyInterval },
-    } = this.configService.getOrThrow('passive_income', { infer: true });
+    const { points: pointsLimit, energy: energyLimit } =
+      this.configService.getOrThrow('player_limits', {
+        infer: true,
+      });
+    const { points: pointsRecoveryTime, energy: energyRecoveryTime } =
+      this.configService.getOrThrow('full_recovery_time', {
+        infer: true,
+      });
 
-    if (Date.now() - points.updatedAt.getTime() > passivePointsInterval) {
-      points.amount = Math.min(
-        this.configService.getOrThrow('limits.points', { infer: true }),
-        points.amount + passivePoints,
-      );
+    if (Date.now() - points.updatedAt.getTime() > pointsRecoveryTime) {
+      points.amount = pointsLimit;
     }
 
-    if (Date.now() - energy.updatedAt.getTime() > passiveEnergyInterval) {
-      energy.amount = Math.min(
-        this.configService.getOrThrow('limits.energy', { infer: true }),
-        energy.amount + passiveEnergy,
-      );
+    if (Date.now() - energy.updatedAt.getTime() > energyRecoveryTime) {
+      energy.amount = energyLimit;
     }
   }
 
@@ -46,9 +44,10 @@ export class AssetService {
     if (!energy) {
       throw new Error(`Player ${playerId} doesn't have needed asset`);
     }
+
     if (
       energy.amount ==
-      this.configService.getOrThrow('limits.energy', {
+      this.configService.getOrThrow('player_limits.energy', {
         infer: true,
       })
     ) {
@@ -56,7 +55,11 @@ export class AssetService {
     }
 
     const elapsedTime =
-      energy.firstChargeInDay.getTime() + 86400000 - Date.now();
+      energy.firstChargeInDay.getTime() +
+      this.configService.getOrThrow('full_recovery_time.energy', {
+        infer: true,
+      }) -
+      Date.now();
 
     return {
       remainingTime: elapsedTime < 0 ? 0 : elapsedTime,
@@ -77,7 +80,7 @@ export class AssetService {
     if (energy.amount < chargePrice) {
       throw new BadRequestException('Not enough energy');
     }
-    points.amount = this.configService.getOrThrow('initial_state.points', {
+    points.amount = this.configService.getOrThrow('player_limits.points', {
       infer: true,
     });
 
@@ -93,34 +96,33 @@ export class AssetService {
   }
   //
   giveReferralReward(referrer: Player, isPremiumReferee: boolean) {
-    const {
-      normal: { amount: normalReward },
-      premium: { amount: premiumReward },
-    } = this.configService.getOrThrow('rewards.referral', { infer: true });
-
+    const { normal: normalReward, premium: premiumReward } =
+      this.configService.getOrThrow('referral_rewards', { infer: true });
     referrer.ambers.amount += isPremiumReferee ? premiumReward : normalReward;
   }
 
   getInitialPlayerAssetsValue() {
+    const { points, energy, ambers } = this.configService.getOrThrow(
+      'initial_player_assets',
+      {
+        infer: true,
+      },
+    );
     return {
-      energy: this.configService.getOrThrow('initial_state.energy', {
-        infer: true,
-      }),
-      points: this.configService.getOrThrow('initial_state.points', {
-        infer: true,
-      }),
-      ambers: this.configService.getOrThrow('initial_state.ar', {
-        infer: true,
-      }),
+      energy,
+      points,
+      ambers,
       totalTapped: 0,
     };
   }
 
   getChargePrice(energy: Energy) {
+    const fullChargePointsCost = this.configService.getOrThrow(
+      'action_price.full_charge_points',
+      { infer: true },
+    );
     return (
-      this.configService.getOrThrow('price.recovery.points.amount', {
-        infer: true,
-      }) * (energy.isNewDay() ? 1 : energy.chargesInDay * 2)
+      fullChargePointsCost * (energy.isNewDay() ? 1 : energy.chargesInDay * 2)
     );
   }
 }

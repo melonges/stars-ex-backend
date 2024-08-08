@@ -1,12 +1,12 @@
 export class SettingsDto {
-  limits: {
+  playerLimits: {
     points: number;
     energy: number;
-    referral: number;
+    referrals: number;
   };
-  chargePrice: number;
-  referralReward: {
-    normal: { amount: number };
-    premium: { amount: number };
+  fullChargePointsCostInEnergy: number;
+  referralRewards: {
+    premium: number;
+    normal: number;
   };
 }

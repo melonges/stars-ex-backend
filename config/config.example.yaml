@@ -1,27 +1,16 @@
-initial_state:
-  points: 5000
+initial_player_assets:
+  points: 500
   energy: 48
-  ar: 0
-limits:
-  points: 5000
+  ambers: 0
+player_limits:
+  points: 500
   energy: 48
-  referral: 10
-passive_income:
-  points:
-    amount: 5000
-    interval: 86400000
-  energy:
-    amount: 48
-    interval: 86400000
-rewards:
-  referral:
-    type: AR
-    premium:
-      amount: 10000
-    normal:
-      amount: 5000
-price:
-  recovery:
-    points:
-      amount: 4
-      type: ENERGY
+  referrals: 10
+full_recovery_time: # in ms
+  points: 86400000
+  energy: 86400000
+referral_rewards: # in ambers
+  premium: 10000
+  normal: 5000
+action_price:
+  full_charge_points: 12 # in energy

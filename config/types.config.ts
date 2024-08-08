@@ -1,47 +1,23 @@
 export type Config = {
-  initial_state: {
+  initial_player_assets: {
     points: number;
     energy: number;
-    ar: number;
+    ambers: number;
   };
-  limits: {
+  player_limits: {
     points: number;
     energy: number;
-    referral: number;
+    referrals: number;
   };
-  passive_income: {
-    points: {
-      amount: number;
-      interval: number;
-    };
-    energy: {
-      amount: number;
-      interval: number;
-    };
+  full_recovery_time: {
+    points: number;
+    energy: number;
   };
-  rewards: {
-    referral: {
-      premium: {
-        amount: number;
-      };
-      normal: {
-        amount: number;
-      };
-    };
+  referral_rewards: {
+    premium: number;
+    normal: number;
   };
-  price: {
-    recovery: {
-      points: {
-        amount: number;
-      };
-    };
-    tap: {
-      points: {
-        amount: number;
-      };
-      ar: {
-        amount: number;
-      };
-    };
+  action_price: {
+    full_charge_points: number;
   };
 };

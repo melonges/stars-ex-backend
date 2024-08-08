@@ -16,13 +16,12 @@ import { PlayerRepository } from 'src/player/player.repository';
 export class EventService {
   constructor(
     private assetService: AssetService,
-    private configService: ConfigService<Config>,
     private playerRepository: PlayerRepository,
     private em: EntityManager,
   ) {}
 
   @EnsureRequestContext()
-  async registerTap(playerId: number, tapEventDto: TapEventDto) {
+  async registerTap(playerId: number, { amount: tapCount }: TapEventDto) {
     const player = await this.playerRepository.findOne(
       { id: playerId },
       { populate: ['points', 'ambers', 'totalTapped', 'energy'] },
@@ -38,17 +37,13 @@ export class EventService {
       throw new InternalServerErrorException();
     }
 
-    const { points: pointsPriceInTap, ar: arPriceInTap } =
-      this.configService.getOrThrow('price.tap', { infer: true });
-    const tapAmountInPoints = tapEventDto.amount * pointsPriceInTap.amount;
-
-    if (points.amount < tapAmountInPoints) {
+    if (points.amount < tapCount) {
       throw new BadRequestException('Not enough points');
     }
 
-    points.amount -= tapAmountInPoints;
-    ambers.amount += tapEventDto.amount * arPriceInTap.amount;
-    totalTapped.amount += tapEventDto.amount;
+    points.amount -= tapCount;
+    ambers.amount += tapCount;
+    totalTapped.amount += tapCount;
     this.assetService.actualize(player);
     await this.em.flush();
   }

@@ -15,11 +15,15 @@ export class SettingsService {
 
   async getSettings(playerId: number): Promise<SettingsDto> {
     const energy = await this.assetRepository.getEnergy(playerId);
-    const chargePrice = this.assetService.getChargePrice(energy!);
-    const limits = this.configService.getOrThrow('limits', { infer: true });
-    const { referral } = this.configService.getOrThrow('rewards', {
+    const fullChargePointsCostInEnergy = this.assetService.getChargePrice(
+      energy!,
+    );
+    const playerLimits = this.configService.getOrThrow('player_limits', {
       infer: true,
     });
-    return { limits, referralReward: referral, chargePrice };
+    const referralRewards = this.configService.getOrThrow('referral_rewards', {
+      infer: true,
+    });
+    return { playerLimits, referralRewards, fullChargePointsCostInEnergy };
   }
 }
