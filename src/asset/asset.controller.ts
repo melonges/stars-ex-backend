@@ -19,7 +19,7 @@ export class AssetController {
   async getPlayerAssets(@PlayerId() id: number): Promise<PlayerAssetsDto> {
     const player = await this.playerRepository.findOneOrFail(
       { id },
-      { populate: ['energy', 'points'] },
+      { populate: ['energy', 'points', 'ambers', 'totalTapped'] },
     );
     this.assetService.actualize(player);
     const { ambers, totalTapped, points, energy } = player;
