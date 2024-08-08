@@ -22,6 +22,7 @@ export class Energy extends BaseEntity<'chargesInDay' | 'firstChargeInDay'> {
     this.amount = amount;
   }
 
+  @Property({ persist: false })
   isNewDay() {
     return this.firstChargeInDay.getTime() + 86400000 < Date.now();
   }
