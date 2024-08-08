@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ReferralModule } from 'src/referral/referral.module';
 import { PlayerModule } from 'src/player/player.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { AssetModule } from 'src/asset/asset.module';
+import { AssetsModule } from 'src/assets/assets.module';
 
 @Module({
   imports: [
@@ -12,7 +12,7 @@ import { AssetModule } from 'src/asset/asset.module';
     forwardRef(() => ReferralModule),
     PlayerModule,
     MikroOrmModule,
-    AssetModule,
+    AssetsModule,
   ],
   providers: [TelegramService],
   exports: [TelegramService],

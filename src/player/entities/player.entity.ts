@@ -9,10 +9,10 @@ import {
 import { BaseEntity } from 'src/common/base.entity';
 import { Referral } from 'src/referral/entites/referral.entity';
 import { PlayerRepository } from '../player.repository';
-import { Ambers } from 'src/asset/entities/ambers.entity';
-import { Points } from 'src/asset/entities/points.entity';
-import { TotalTapped } from 'src/asset/entities/total-tapped.entity';
-import { Energy } from 'src/asset/entities/energy.entity';
+import { Ambers } from 'src/assets/entities/ambers.entity';
+import { Points } from 'src/assets/entities/points.entity';
+import { TotalTapped } from 'src/assets/entities/total-tapped.entity';
+import { Energy } from 'src/assets/entities/energy.entity';
 
 @Entity({ repository: () => PlayerRepository })
 export class Player extends BaseEntity {

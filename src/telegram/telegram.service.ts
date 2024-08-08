@@ -19,7 +19,7 @@ import { PlayerService } from 'src/player/player.service';
 import { ReferralService } from 'src/referral/referral.service';
 import { getReferralIdFromMatch } from './telegram.helpers';
 import { EnsureRequestContext, EntityManager } from '@mikro-orm/postgresql';
-import { AssetService } from 'src/asset/asset.service';
+import { AssetsService } from 'src/assets/assets.service';
 
 @Injectable()
 export class TelegramService implements OnApplicationBootstrap {
@@ -30,7 +30,7 @@ export class TelegramService implements OnApplicationBootstrap {
     private playerService: PlayerService,
     @Inject(forwardRef(() => ReferralService))
     private referralService: ReferralService,
-    private assetService: AssetService,
+    private assetsService: AssetsService,
     private em: EntityManager,
   ) {
     this.bot = new Bot(this.configService.getOrThrow('TELEGRAM_TOKEN'));
@@ -96,7 +96,7 @@ export class TelegramService implements OnApplicationBootstrap {
       if (referrer) {
         const isPremiumNewPlayer = Boolean(ctx.from?.is_premium);
         this.referralService.addNewReferral(referrer, newPlayer);
-        this.assetService.giveReferralReward(referrer, isPremiumNewPlayer);
+        this.assetsService.giveReferralReward(referrer, isPremiumNewPlayer);
       }
       await this.em.commit();
       this.logger.log(`New player ${fromId} registered`);

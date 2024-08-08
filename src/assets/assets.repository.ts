@@ -5,7 +5,7 @@ import { Player } from 'src/player/entities/player.entity';
 import { Ambers, Energy, Points } from './entities';
 
 @Injectable()
-export class AssetRepository {
+export class AssetsRepository {
   constructor(
     @InjectRepository(Energy)
     private energyRepository: EntityRepository<Energy>,

@@ -4,10 +4,10 @@ import { TelegramModule } from './telegram/telegram.module';
 import { PlayerModule } from './player/player.module';
 import { ReferralModule } from './referral/referral.module';
 import { DatabaseModule } from './database/database.module';
-import { AssetModule } from './asset/asset.module';
 import { EventModule } from './event/event.module';
 import { SettingsModule } from './settings/settings.module';
 import { TasksModule } from './tasks/tasks.module';
+import { AssetsModule } from './assets/assets.module';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { TasksModule } from './tasks/tasks.module';
     PlayerModule,
     DatabaseModule,
     ReferralModule,
-    AssetModule,
+    AssetsModule,
     EventModule,
     SettingsModule,
     TasksModule,

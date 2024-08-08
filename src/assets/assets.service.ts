@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { AssetRepository } from './asset.repository';
 import { Player } from 'src/player/entities/player.entity';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'config/types.config';
 import { EntityManager } from '@mikro-orm/core';
 import { RemainingTimeDto } from './dto/remaining-time.dto';
 import { Energy } from './entities/energy.entity';
+import { AssetsRepository } from './assets.repository';
 
 @Injectable()
-export class AssetService {
-  logger = new Logger(AssetService.name);
+export class AssetsService {
+  logger = new Logger(AssetsService.name);
   constructor(
-    private assetRepository: AssetRepository,
+    private assetRepository: AssetsRepository,
     private configService: ConfigService<Config>,
     private em: EntityManager,
   ) {}

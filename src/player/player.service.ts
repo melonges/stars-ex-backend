@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { Player } from './entities/player.entity';
-import { AssetService } from 'src/asset/asset.service';
 import { EntityManager, FindOneOptions } from '@mikro-orm/postgresql';
 import { ParsedTelegramInitData } from 'src/auth/auth.types';
+import { AssetsService } from 'src/assets/assets.service';
 
 @Injectable()
 export class PlayerService {
   constructor(
-    private assetService: AssetService,
+    private assetsService: AssetsService,
     private em: EntityManager,
   ) {}
   create({ id, username }: CreatePlayerDto) {
     const { totalTapped, energy, ambers, points } =
-      this.assetService.getInitialPlayerAssetsValue();
+      this.assetsService.getInitialPlayerAssetsValue();
     const player = this.em.create(Player, {
       id,
       username,

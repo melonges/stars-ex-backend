@@ -4,14 +4,14 @@ import configuration from 'config/configuration';
 import { SettingsController } from './settings.controller';
 import { SettingsService } from './settings.serivce';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { Energy } from 'src/asset/entities';
-import { AssetModule } from 'src/asset/asset.module';
+import { AssetsModule } from 'src/assets/assets.module';
+import { Energy } from 'src/assets/entities';
 
 @Module({
   imports: [
     ConfigModule.forFeature(configuration),
     MikroOrmModule.forFeature([Energy]),
-    AssetModule,
+    AssetsModule,
   ],
   controllers: [SettingsController],
   providers: [SettingsService],

@@ -1,17 +1,17 @@
 import { Controller, Get, Post } from '@nestjs/common';
-import { AssetService } from './asset.service';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { PlayerId } from 'src/common/decorators/player-id.decorator';
 import { PlayerAssetsDto } from './dto/player-assets.dto';
 import { RemainingTimeDto } from './dto/remaining-time.dto';
 import { PlayerRepository } from 'src/player/player.repository';
+import { AssetsService } from './assets.service';
 
 @ApiBearerAuth()
-@ApiTags('Asset')
-@Controller('asset')
-export class AssetController {
+@ApiTags('Assets')
+@Controller('assets')
+export class AssetsController {
   constructor(
-    private readonly assetService: AssetService,
+    private readonly assetsService: AssetsService,
     private playerRepository: PlayerRepository,
   ) {}
 
@@ -21,7 +21,7 @@ export class AssetController {
       { id },
       { populate: ['energy', 'points', 'ambers', 'totalTapped'] },
     );
-    this.assetService.actualize(player);
+    this.assetsService.actualize(player);
     const { ambers, totalTapped, points, energy } = player;
     return {
       points: points.amount,
@@ -34,11 +34,11 @@ export class AssetController {
   @Post('charge-points')
   @ApiBadRequestResponse({ description: 'Not enough energy' })
   chargePoints(@PlayerId() id: number) {
-    this.assetService.chargePoints(id);
+    this.assetsService.chargePoints(id);
   }
 
   @Get('time-to-full-energy')
   getTimeToFullEnergy(@PlayerId() id: number): Promise<RemainingTimeDto> {
-    return this.assetService.getTimeToFullEnergy(id);
+    return this.assetsService.getTimeToFullEnergy(id);
   }
 }

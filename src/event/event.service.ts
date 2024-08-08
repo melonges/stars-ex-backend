@@ -5,17 +5,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { TapEventDto } from './dto/tap-event.dto';
-import { AssetService } from 'src/asset/asset.service';
 import { EnsureRequestContext } from '@mikro-orm/core';
-import { Config } from 'config/types.config';
-import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PlayerRepository } from 'src/player/player.repository';
+import { AssetsService } from 'src/assets/assets.service';
 
 @Injectable()
 export class EventService {
   constructor(
-    private assetService: AssetService,
+    private assetsService: AssetsService,
     private playerRepository: PlayerRepository,
     private em: EntityManager,
   ) {}
@@ -44,7 +42,7 @@ export class EventService {
     points.amount -= tapCount;
     ambers.amount += tapCount;
     totalTapped.amount += tapCount;
-    this.assetService.actualize(player);
+    this.assetsService.actualize(player);
     await this.em.flush();
   }
 }

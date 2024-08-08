@@ -4,14 +4,10 @@ import { Player } from './entities/player.entity';
 import { PlayerController } from './player.controller';
 import { PlayerService } from './player.service';
 import { PlayerRepository } from './player.repository';
-import { AssetModule } from 'src/asset/asset.module';
+import { AssetsModule } from 'src/assets/assets.module';
 
 @Module({
-  imports: [
-    MikroOrmModule.forFeature([Player]),
-    AssetModule,
-    // ConfigModule.forFeature(configuration),
-  ],
+  imports: [MikroOrmModule.forFeature([Player]), AssetsModule],
   controllers: [PlayerController],
   providers: [PlayerService, PlayerRepository],
   exports: [PlayerService, PlayerRepository],
