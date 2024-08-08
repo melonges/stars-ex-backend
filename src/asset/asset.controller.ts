@@ -19,28 +19,26 @@ export class AssetController {
   async getPlayerAssets(@PlayerId() id: number): Promise<PlayerAssetsDto> {
     const player = await this.playerRepository.findOneOrFail(
       { id },
-      { populate: ['energy', 'points', 'totalTapped'] },
+      { populate: ['energy', 'points'] },
     );
     this.assetService.actualize(player);
     const { ambers, totalTapped, points, energy } = player;
-    // TODO: rename totalTaps to totalTapped
-    // rename ar to ambers
     return {
       points: points.amount,
       energy: energy.amount,
-      ar: ambers.amount,
-      totalTaps: totalTapped.amount,
+      ambers: ambers.amount,
+      totalTapped: totalTapped.amount,
     };
   }
 
-  // @Post('charge-points')
-  // @ApiBadRequestResponse({ description: 'Not enough energy' })
-  // chargePoints(@PlayerId() id: number) {
-  //   this.assetService.chargePoints(id);
-  // }
-  //
-  // @Get('time-to-full-energy')
-  // getTimeToFullEnergy(@PlayerId() id: number): Promise<RemainingTimeDto> {
-  //   return this.assetService.getTimeToFullEnergy(id);
-  // }
+  @Post('charge-points')
+  @ApiBadRequestResponse({ description: 'Not enough energy' })
+  chargePoints(@PlayerId() id: number) {
+    this.assetService.chargePoints(id);
+  }
+
+  @Get('time-to-full-energy')
+  getTimeToFullEnergy(@PlayerId() id: number): Promise<RemainingTimeDto> {
+    return this.assetService.getTimeToFullEnergy(id);
+  }
 }

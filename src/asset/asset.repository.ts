@@ -18,15 +18,15 @@ export class AssetRepository {
     private em: EntityManager,
   ) {}
 
-  getPoints(player: Player) {
-    return this.pointsRepository.find({ player });
+  getPoints<T extends number | Player>(player: T) {
+    return this.pointsRepository.findOne({ player });
   }
 
-  getEnergy(player: Player) {
-    return this.energyRepository.find({ player });
+  getEnergy<T extends number | Player>(player: T) {
+    return this.energyRepository.findOne({ player });
   }
 
-  getAmbers(player: Player) {
-    return this.ambersRepository.find({ player });
+  getAmbers<T extends number | Player>(player: T) {
+    return this.ambersRepository.findOne({ player });
   }
 }

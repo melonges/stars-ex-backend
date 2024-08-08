@@ -6,9 +6,6 @@ import { Config } from 'config/types.config';
 import { EntityManager } from '@mikro-orm/core';
 import { RemainingTimeDto } from './dto/remaining-time.dto';
 import { Energy } from './entities/energy.entity';
-import { Points } from './entities/points.entity';
-import { Ambers } from './entities/ambers.entity';
-import { TotalTapped } from './entities/total-tapped.entity';
 
 @Injectable()
 export class AssetService {
@@ -44,55 +41,55 @@ export class AssetService {
     }
   }
 
-  // async getTimeToFullEnergy(playerId: number): Promise<RemainingTimeDto> {
-  //   const assets = await this.assetRepository.getAssetsByPlayerId(playerId);
-  //   if (!energy) {
-  //     throw new Error(`Player ${playerId} doesn't have needed asset`);
-  //   }
-  //   if (
-  //     energy.amount ==
-  //     this.configService.getOrThrow('limits.energy', {
-  //       infer: true,
-  //     })
-  //   ) {
-  //     return { remainingTime: 0 };
-  //   }
-  //
-  //   const elapsedTime = Date.now() - energy.updatedAt.getTime();
-  //
-  //   return {
-  //     remainingTime: elapsedTime,
-  //   };
-  // }
+  async getTimeToFullEnergy(playerId: number): Promise<RemainingTimeDto> {
+    const energy = await this.assetRepository.getEnergy(playerId);
+    if (!energy) {
+      throw new Error(`Player ${playerId} doesn't have needed asset`);
+    }
+    if (
+      energy.amount ==
+      this.configService.getOrThrow('limits.energy', {
+        infer: true,
+      })
+    ) {
+      return { remainingTime: 0 };
+    }
 
-  // async chargePoints(playerId: number) {
-  //   const asset = await this.assetRepository.getAssetsByPlayerId(playerId);
-  //   const points = asset.find((asset) => asset.name === AssetName.POINT);
-  //   const energy = asset.find((asset) => asset.name === AssetName.ENERGY);
-  //   if (!points || !energy) {
-  //     throw new Error(`Player ${playerId} doesn't have needed asset`);
-  //   }
-  //
-  //   if (
-  //     energy.amount <
-  //     this.configService.getOrThrow('price.recovery.points.amount', {
-  //       infer: true,
-  //     })
-  //   ) {
-  //     throw new BadRequestException('Not enough energy');
-  //   }
-  //   points.amount = this.configService.getOrThrow('initial_state.points', {
-  //     infer: true,
-  //   });
-  //
-  //   energy.amount -= this.configService.getOrThrow(
-  //     'price.recovery.points.amount',
-  //     {
-  //       infer: true,
-  //     },
-  //   );
-  //   await this.em.flush();
-  // }
+    const elapsedTime = Date.now() - energy.firstChargeInDay.getTime();
+
+    return {
+      remainingTime: elapsedTime,
+    };
+  }
+
+  async chargePoints(playerId: number) {
+    const [points, energy] = await Promise.all([
+      this.assetRepository.getPoints(playerId),
+      this.assetRepository.getEnergy(playerId),
+    ]);
+    if (!points || !energy) {
+      throw new Error(`Player ${playerId} doesn't have needed asset`);
+    }
+
+    const chargePrice = this.getChargePrice(energy);
+
+    if (energy.amount < chargePrice) {
+      throw new BadRequestException('Not enough energy');
+    }
+    points.amount = this.configService.getOrThrow('initial_state.points', {
+      infer: true,
+    });
+
+    if (energy.isNewDay()) {
+      energy.firstChargeInDay = new Date();
+      energy.chargesInDay = 1;
+    } else {
+      energy.chargesInDay++;
+    }
+
+    energy.amount -= chargePrice;
+    await this.em.flush();
+  }
   //
   giveReferralReward(referrer: Player, isPremiumReferee: boolean) {
     const {
@@ -116,5 +113,13 @@ export class AssetService {
       }),
       totalTapped: 0,
     };
+  }
+
+  private getChargePrice(energy: Energy) {
+    return (
+      this.configService.getOrThrow('price.recovery.points.amount', {
+        infer: true,
+      }) * (energy.isNewDay() ? 1 : energy.chargesInDay * 2)
+    );
   }
 }
