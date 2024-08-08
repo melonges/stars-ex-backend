@@ -2,7 +2,6 @@ import { EntityRepository } from '@mikro-orm/postgresql';
 import { Referral } from './entites/referral.entity';
 import { Player } from 'src/player/entities/player.entity';
 import { ReferralDto } from './dto/referral.dto';
-import { AssetName } from 'src/asset/entities/asset.entity';
 import {
   PaginatedResponse,
   PaginationDto,
@@ -21,7 +20,7 @@ export class ReferralRepository extends EntityRepository<Referral> {
       Referral,
       { referrer: { id: playerId } },
       {
-        populate: ['referee.username', 'referee.assets'],
+        populate: ['referee.username', 'referee.ambers'],
         fields: ['referee'],
         limit: options.perPage,
         offset: options.page * options.perPage,
@@ -30,7 +29,7 @@ export class ReferralRepository extends EntityRepository<Referral> {
     return {
       data: referrer.map(({ referee }) => ({
         username: referee.username,
-        ar: referee.assets.find((asset) => asset.name === AssetName.AR)!.amount,
+        ambers: referee.ambers.amount,
       })),
       meta: {
         page: options.page,

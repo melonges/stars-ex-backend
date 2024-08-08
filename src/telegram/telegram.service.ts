@@ -6,7 +6,14 @@ import {
   OnApplicationBootstrap,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Bot, CommandContext, Context } from 'grammy';
+import {
+  Bot,
+  BotError,
+  CommandContext,
+  Context,
+  GrammyError,
+  HttpError,
+} from 'grammy';
 import { TelegramConfig } from './telegram.types';
 import { PlayerService } from 'src/player/player.service';
 import { ReferralService } from 'src/referral/referral.service';
@@ -30,6 +37,7 @@ export class TelegramService implements OnApplicationBootstrap {
   }
   onApplicationBootstrap() {
     this.bot.command('start', this.start.bind(this));
+    this.bot.catch(this.catchErrors.bind(this));
     // TODO: remove
     this.bot.command('dev', (ctx) =>
       ctx.reply('app', {
@@ -51,9 +59,6 @@ export class TelegramService implements OnApplicationBootstrap {
   }
 
   getBotUserName(): string {
-    if (!this.bot.isInited()) {
-      throw new Error('Bot is not inited');
-    }
     return this.bot.botInfo.username;
   }
 
@@ -81,21 +86,38 @@ export class TelegramService implements OnApplicationBootstrap {
     if (await this.playerService.isExists(fromId)) {
       return await this.welcome(ctx);
     }
-    //TODO: check on bot
-    const newPlayer = this.playerService.create({
-      id: fromId,
-      username: ctx.from?.username,
-    });
-    if (refId && !isNaN(Number(refId))) {
-      const referrer = await this.playerService.getPlayerByRefId(Number(refId));
+    const referrer = await this.playerService.getPlayerByRefId(Number(refId));
+    try {
+      await this.em.begin();
+      const newPlayer = this.playerService.create({
+        id: fromId,
+        username: ctx.from?.username,
+      });
       if (referrer) {
         const isPremiumNewPlayer = Boolean(ctx.from?.is_premium);
         this.referralService.addNewReferral(referrer, newPlayer);
         this.assetService.giveReferralReward(referrer, isPremiumNewPlayer);
       }
+      await this.em.commit();
+      this.logger.log(`New player ${fromId} registered`);
+      await this.welcome(ctx);
+    } catch (error) {
+      await this.em.rollback();
+      throw error;
     }
-    await this.em.persistAndFlush(newPlayer);
-    this.logger.log(`New player ${fromId} registered`);
-    await this.welcome(ctx);
+  }
+
+  private async catchErrors(err: BotError) {
+    const ctx = err.ctx;
+    this.logger.error(`Error while handling update ${ctx.update.update_id}:`);
+    const e = err.error;
+    if (e instanceof GrammyError) {
+      this.logger.error('Error in request:', e.description);
+    } else if (e instanceof HttpError) {
+      this.logger.error('Could not contact Telegram:', e);
+    } else {
+      this.logger.error('Unknown error:', e);
+    }
+    await ctx.reply('An error occurred. Try again later');
   }
 }

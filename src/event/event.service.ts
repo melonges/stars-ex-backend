@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { TapEventDto } from './dto/tap-event.dto';
 import { AssetService } from 'src/asset/asset.service';
-import { AssetName } from 'src/asset/entities/asset.entity';
 import { EnsureRequestContext } from '@mikro-orm/core';
 import { Config } from 'config/types.config';
 import { ConfigService } from '@nestjs/config';
@@ -26,22 +25,16 @@ export class EventService {
   async registerTap(playerId: number, tapEventDto: TapEventDto) {
     const player = await this.playerRepository.findOne(
       { id: playerId },
-      { populate: ['assets'] },
+      { populate: ['points', 'ambers', 'totalTapped'] },
     );
 
     if (!player) {
       throw new UnauthorizedException('player not found');
     }
 
-    const points = player.assets.find(
-      (asset) => asset.name === AssetName.POINT,
-    );
-    const ar = player.assets.find((asset) => asset.name === AssetName.AR);
-    const totalTapped = player.assets.find(
-      (asset) => asset.name === AssetName.TOTAL_TAPED,
-    );
+    const { totalTapped, ambers, points } = player;
 
-    if (!points || !ar || !totalTapped) {
+    if (!points || !ambers || !totalTapped) {
       throw new InternalServerErrorException();
     }
 
@@ -54,7 +47,7 @@ export class EventService {
     }
 
     points.amount -= tapAmountInPoints;
-    ar.amount += tapEventDto.amount * arPriceInTap.amount;
+    ambers.amount += tapEventDto.amount * arPriceInTap.amount;
     totalTapped.amount += tapEventDto.amount;
     this.assetService.actualize(player);
     await this.em.flush();

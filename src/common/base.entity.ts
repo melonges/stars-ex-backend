@@ -5,8 +5,8 @@ import {
   Property,
 } from '@mikro-orm/core';
 
-export abstract class BaseEntity {
-  [OptionalProps]?: 'createdAt' | 'updatedAt';
+export abstract class BaseEntity<Optional = never> {
+  [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional;
   @PrimaryKey({ type: new BigIntType('number') })
   id: number;
 
