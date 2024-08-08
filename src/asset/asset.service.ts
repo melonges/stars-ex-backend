@@ -56,7 +56,7 @@ export class AssetService {
     }
 
     const elapsedTime =
-      energy.firstChargeInDay.getTime() + 864000000 - Date.now();
+      energy.firstChargeInDay.getTime() + 86400000 - Date.now();
 
     return {
       remainingTime: elapsedTime < 0 ? 0 : elapsedTime,
