@@ -5,8 +5,8 @@ import { SettingsService } from './settings.serivce';
 import { SettingsDto } from './dto/settings.dto';
 
 @ApiBearerAuth()
-@ApiTags('Setting')
-@Controller('setting')
+@ApiTags('Settings')
+@Controller('settings')
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
