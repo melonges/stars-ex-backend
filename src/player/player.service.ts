@@ -48,6 +48,7 @@ export class PlayerService {
   }
 
   getPlayerByRefId(refId: number): Promise<Player | null> {
+    if (isNaN(refId)) return Promise.resolve(null);
     return this.getPlayer(refId, { populate: ['ambers'] });
   }
 }
