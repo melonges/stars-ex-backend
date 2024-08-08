@@ -11,12 +11,17 @@ export class PlayerService {
     private assetService: AssetService,
     private em: EntityManager,
   ) {}
-  create(createPlayerDto: CreatePlayerDto) {
-    const player = new Player(createPlayerDto.id, createPlayerDto.username);
-    this.assetService
-      .getInitialAssets(player)
-      .forEach((asset) => player.assets.add(asset));
-    this.em.persist(player);
+  create({ id, username }: CreatePlayerDto) {
+    const { totalTapped, energy, ambers, points } =
+      this.assetService.getInitialPlayerAssetsValue();
+    const player = this.em.create(Player, {
+      id,
+      username,
+      totalTapped: { amount: totalTapped },
+      points: { amount: points, player: id },
+      energy: { amount: energy, player: id },
+      ambers: { amount: ambers, player: id },
+    });
     return player;
   }
 
@@ -43,6 +48,6 @@ export class PlayerService {
   }
 
   getPlayerByRefId(refId: number): Promise<Player | null> {
-    return this.getPlayer(refId, { populate: ['assets'] });
+    return this.getPlayer(refId, { populate: ['ambers'] });
   }
 }

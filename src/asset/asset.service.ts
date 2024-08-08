@@ -1,11 +1,14 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { Asset, AssetName } from './entities/asset.entity';
 import { AssetRepository } from './asset.repository';
 import { Player } from 'src/player/entities/player.entity';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'config/types.config';
 import { EntityManager } from '@mikro-orm/core';
 import { RemainingTimeDto } from './dto/remaining-time.dto';
+import { Energy } from './entities/energy.entity';
+import { Points } from './entities/points.entity';
+import { Ambers } from './entities/ambers.entity';
+import { TotalTapped } from './entities/total-tapped.entity';
 
 @Injectable()
 export class AssetService {
@@ -16,11 +19,9 @@ export class AssetService {
     private em: EntityManager,
   ) {}
 
-  actualize(player: Player) {
-    const points = this.getAssetSync(player, AssetName.POINT);
-    const energy = this.getAssetSync(player, AssetName.ENERGY);
+  actualize({ energy, points, id }: Player) {
     if (!points || !energy) {
-      throw new Error(`Player ${player.id} doesn't have needed asset`);
+      throw new Error(`Player ${id} doesn't have needed asset`);
     }
 
     const {
@@ -43,125 +44,77 @@ export class AssetService {
     }
   }
 
-  async getTimeToFullEnergy(playerId: number): Promise<RemainingTimeDto> {
-    const assets = await this.assetRepository.getAssetsByPlayerId(playerId);
-    const energy = assets.find((asset) => asset.name === AssetName.ENERGY);
-    if (!energy) {
-      throw new Error(`Player ${playerId} doesn't have needed asset`);
-    }
-    if (
-      energy.amount ==
-      this.configService.getOrThrow('limits.energy', {
-        infer: true,
-      })
-    ) {
-      return { remainingTime: 0 };
-    }
+  // async getTimeToFullEnergy(playerId: number): Promise<RemainingTimeDto> {
+  //   const assets = await this.assetRepository.getAssetsByPlayerId(playerId);
+  //   if (!energy) {
+  //     throw new Error(`Player ${playerId} doesn't have needed asset`);
+  //   }
+  //   if (
+  //     energy.amount ==
+  //     this.configService.getOrThrow('limits.energy', {
+  //       infer: true,
+  //     })
+  //   ) {
+  //     return { remainingTime: 0 };
+  //   }
+  //
+  //   const elapsedTime = Date.now() - energy.updatedAt.getTime();
+  //
+  //   return {
+  //     remainingTime: elapsedTime,
+  //   };
+  // }
 
-    const elapsedTime = Date.now() - energy.updatedAt.getTime();
-
-    return {
-      remainingTime: elapsedTime,
-    };
-  }
-
-  async chargePoints(playerId: number) {
-    const asset = await this.assetRepository.getAssetsByPlayerId(playerId);
-    const points = asset.find((asset) => asset.name === AssetName.POINT);
-    const energy = asset.find((asset) => asset.name === AssetName.ENERGY);
-    if (!points || !energy) {
-      throw new Error(`Player ${playerId} doesn't have needed asset`);
-    }
-
-    if (
-      energy.amount <
-      this.configService.getOrThrow('price.recovery.points.amount', {
-        infer: true,
-      })
-    ) {
-      throw new BadRequestException('Not enough energy');
-    }
-    points.amount = this.configService.getOrThrow('initial_state.points', {
-      infer: true,
-    });
-
-    energy.amount -= this.configService.getOrThrow(
-      'price.recovery.points.amount',
-      {
-        infer: true,
-      },
-    );
-    await this.em.flush();
-  }
-
-  getAssetSync(player: Player, name: AssetName) {
-    return player.assets.find((asset) => asset.name === name);
-  }
-
-  add(player: Player, name: AssetName, amount: number) {
-    const asset = player.assets.find((asset) => asset.name === name);
-    if (asset) {
-      asset.amount += amount;
-    } else {
-      throw new Error(`Player ${player.id} doesn't have ${name} asset`);
-    }
-  }
-
-  take(player: Player, name: AssetName, amount: number) {
-    const asset = player.assets.find((asset) => asset.name === name);
-    if (asset) {
-      asset.amount -= amount;
-    } else {
-      throw new Error(`Player ${player.id} doesn't have ${name} asset`);
-    }
-  }
-
+  // async chargePoints(playerId: number) {
+  //   const asset = await this.assetRepository.getAssetsByPlayerId(playerId);
+  //   const points = asset.find((asset) => asset.name === AssetName.POINT);
+  //   const energy = asset.find((asset) => asset.name === AssetName.ENERGY);
+  //   if (!points || !energy) {
+  //     throw new Error(`Player ${playerId} doesn't have needed asset`);
+  //   }
+  //
+  //   if (
+  //     energy.amount <
+  //     this.configService.getOrThrow('price.recovery.points.amount', {
+  //       infer: true,
+  //     })
+  //   ) {
+  //     throw new BadRequestException('Not enough energy');
+  //   }
+  //   points.amount = this.configService.getOrThrow('initial_state.points', {
+  //     infer: true,
+  //   });
+  //
+  //   energy.amount -= this.configService.getOrThrow(
+  //     'price.recovery.points.amount',
+  //     {
+  //       infer: true,
+  //     },
+  //   );
+  //   await this.em.flush();
+  // }
+  //
   giveReferralReward(referrer: Player, isPremiumReferee: boolean) {
     const {
       normal: { amount: normalReward },
       premium: { amount: premiumReward },
     } = this.configService.getOrThrow('rewards.referral', { infer: true });
 
-    return this.add(
-      referrer,
-      AssetName.AR,
-      isPremiumReferee ? premiumReward : normalReward,
-    );
+    referrer.ambers.amount += isPremiumReferee ? premiumReward : normalReward;
   }
 
-  getInitialAssets(player: Player) {
-    return [
-      new Asset(
-        player,
-        AssetName.POINT,
-        this.configService.getOrThrow('initial_state.points', { infer: true }),
-      ),
-
-      new Asset(
-        player,
-        AssetName.ENERGY,
-        this.configService.getOrThrow('initial_state.energy', { infer: true }),
-      ),
-      new Asset(
-        player,
-        AssetName.AR,
-        this.configService.getOrThrow('initial_state.ar', { infer: true }),
-      ),
-      new Asset(player, AssetName.TOTAL_TAPED, 0),
-    ];
-  }
-
-  getAsset(player: Player, name: AssetName) {
-    return this.assetRepository.getAsset(player, name);
-  }
-
-  getAssets(player: Player): Promise<Asset[]>;
-  getAssets(playerId: number): Promise<Asset[]>;
-  getAssets(arg: Player | number): Promise<Asset | Asset[]> {
-    if (typeof arg === 'number') {
-      return this.assetRepository.getAssetsByPlayerId(arg);
-    } else {
-      return this.assetRepository.getAssetsByPlayer(arg);
-    }
+  getInitialPlayerAssetsValue() {
+    return {
+      energy: this.configService.getOrThrow('initial_state.energy', {
+        infer: true,
+      }),
+      points: this.configService.getOrThrow('initial_state.points', {
+        infer: true,
+      }),
+      ambers: this.configService.getOrThrow('initial_state.ar', {
+        infer: true,
+      }),
+      totalTapped: 0,
+    };
   }
 }

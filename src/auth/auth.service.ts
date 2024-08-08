@@ -37,7 +37,7 @@ export class AuthService {
     }
     return [
       await this.playerService.getPlayer(parsedTgInitData.user.id, {
-        populate: ['assets'],
+        populate: ['points', 'energy'],
       }),
       parsedTgInitData,
     ];

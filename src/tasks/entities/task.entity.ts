@@ -1,5 +1,4 @@
 import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/core';
-import { AssetName } from 'src/asset/entities/asset.entity';
 import { BaseEntity } from 'src/common/base.entity';
 import { Player } from 'src/player/entities/player.entity';
 import { TasksRepository } from '../tasks.repository';
@@ -10,9 +9,7 @@ export class Task extends BaseEntity {
   @Property()
   title: string;
   @Property()
-  reward: number;
-  @Enum({ items: () => AssetName, nativeEnumName: NativeEnumName.ASSET })
-  currency: AssetName;
+  rewardInAmbers: number;
   @Enum({ items: () => TaskType, nativeEnumName: NativeEnumName.TASK_TYPE })
   type: TaskType;
   @Property({ type: 'jsonb' })

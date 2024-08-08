@@ -20,6 +20,7 @@ import { DatabaseConfig } from './database.types';
           password: configService.getOrThrow('POSTGRES_PASSWORD'),
           dbName: configService.getOrThrow('POSTGRES_DB'),
           driver: PostgreSqlDriver,
+          debug: process.env.NODE_ENV === 'development',
         };
       },
       inject: [ConfigService],

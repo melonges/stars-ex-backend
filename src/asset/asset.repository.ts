@@ -1,35 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { Asset, AssetName } from './entities/asset.entity';
-import { EntityManager, EntityRepository, wrap } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Player } from 'src/player/entities/player.entity';
+import { Ambers, Energy, Points } from './entities';
 
 @Injectable()
 export class AssetRepository {
   constructor(
-    @InjectRepository(Asset)
-    private _assetRepository: EntityRepository<Asset>,
+    @InjectRepository(Energy)
+    private energyRepository: EntityRepository<Energy>,
+
+    @InjectRepository(Points)
+    private pointsRepository: EntityRepository<Points>,
+
+    @InjectRepository(Ambers)
+    private ambersRepository: EntityRepository<Ambers>,
     private em: EntityManager,
   ) {}
 
-  updateAsset(asset: Asset) {
-    wrap(asset).assign({ id: asset.id });
-    return this.em.fork().persistAndFlush(asset);
+  getPoints(player: Player) {
+    return this.pointsRepository.find({ player });
   }
 
-  registerAsset(asset: Asset) {
-    return this._assetRepository.insert(asset);
+  getEnergy(player: Player) {
+    return this.energyRepository.find({ player });
   }
 
-  getAssetsByPlayer(player: Player) {
-    return this._assetRepository.find({ player });
-  }
-
-  getAssetsByPlayerId(playerId: number) {
-    return this._assetRepository.find({ player: { id: playerId } });
-  }
-
-  getAsset(player: Player, name: AssetName) {
-    return this._assetRepository.findOne({ player, name });
+  getAmbers(player: Player) {
+    return this.ambersRepository.find({ player });
   }
 }
