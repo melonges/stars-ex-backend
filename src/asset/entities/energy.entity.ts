@@ -1,4 +1,4 @@
-import { Entity, OneToOne, OptionalProps, Property } from '@mikro-orm/core';
+import { Entity, OneToOne, Property } from '@mikro-orm/core';
 import { BaseEntity } from 'src/common/base.entity';
 import { Player } from 'src/player/entities/player.entity';
 
@@ -14,7 +14,7 @@ export class Energy extends BaseEntity<'chargesInDay' | 'firstChargeInDay'> {
   chargesInDay = 0;
 
   @Property()
-  firstChargeInDay = new Date();
+  firstChargeInDay = new Date(0);
 
   constructor(player: Player, amount: number) {
     super();
@@ -24,6 +24,6 @@ export class Energy extends BaseEntity<'chargesInDay' | 'firstChargeInDay'> {
 
   @Property({ persist: false })
   isNewDay() {
-    return this.firstChargeInDay.getTime() + 86400000 < Date.now();
+    return Date.now() - this.firstChargeInDay.getTime() > 86400000;
   }
 }
