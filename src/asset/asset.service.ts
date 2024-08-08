@@ -115,7 +115,7 @@ export class AssetService {
     };
   }
 
-  private getChargePrice(energy: Energy) {
+  getChargePrice(energy: Energy) {
     return (
       this.configService.getOrThrow('price.recovery.points.amount', {
         infer: true,

@@ -11,7 +11,7 @@ export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Get()
-  findOne(@PlayerId() id: number): SettingsDto {
+  findOne(@PlayerId() id: number): Promise<SettingsDto> {
     return this.settingsService.getSettings(id);
   }
 }

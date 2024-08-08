@@ -18,6 +18,6 @@ import { Energy } from './entities/energy.entity';
   ],
   controllers: [AssetController],
   providers: [AssetService, AssetRepository],
-  exports: [AssetService],
+  exports: [AssetService, AssetRepository],
 })
 export class AssetModule {}
