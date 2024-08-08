@@ -55,10 +55,11 @@ export class AssetService {
       return { remainingTime: 0 };
     }
 
-    const elapsedTime = Date.now() - energy.firstChargeInDay.getTime();
+    const elapsedTime =
+      energy.firstChargeInDay.getTime() + 864000000 - Date.now();
 
     return {
-      remainingTime: elapsedTime,
+      remainingTime: elapsedTime < 0 ? 0 : elapsedTime,
     };
   }
 
