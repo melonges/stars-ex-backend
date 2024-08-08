@@ -25,7 +25,7 @@ export class EventService {
   async registerTap(playerId: number, tapEventDto: TapEventDto) {
     const player = await this.playerRepository.findOne(
       { id: playerId },
-      { populate: ['points', 'ambers', 'totalTapped'] },
+      { populate: ['points', 'ambers', 'totalTapped', 'energy'] },
     );
 
     if (!player) {
