@@ -29,8 +29,7 @@ export class ReferralRepository extends EntityRepository<Referral> {
     return {
       data: referrer.map(({ referee }) => ({
         username: referee.username,
-        // TODO: rename ar to ambers
-        ar: referee.ambers.amount,
+        ambers: referee.ambers.amount,
       })),
       meta: {
         page: options.page,
