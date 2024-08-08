@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'config/types.config';
-import { SettingDto } from './dto/setting.dto';
+import { SettingsDto } from './dto/settings.dto';
 
 @Injectable()
-export class SettingService {
+export class SettingsService {
   constructor(private readonly configService: ConfigService<Config>) {}
 
-  getSetting(_: number): SettingDto {
+  getSettings(_: number): SettingsDto {
     _;
     const price = this.configService.getOrThrow('price', { infer: true });
     const limits = this.configService.getOrThrow('limits', { infer: true });

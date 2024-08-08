@@ -6,7 +6,7 @@ import { ReferralModule } from './referral/referral.module';
 import { DatabaseModule } from './database/database.module';
 import { AssetModule } from './asset/asset.module';
 import { EventModule } from './event/event.module';
-import { SettingModule } from './setting/setting.module';
+import { SettingsModule } from './settings/settings.module';
 import { TasksModule } from './tasks/tasks.module';
 
 @Module({
@@ -18,7 +18,7 @@ import { TasksModule } from './tasks/tasks.module';
     ReferralModule,
     AssetModule,
     EventModule,
-    SettingModule,
+    SettingsModule,
     TasksModule,
   ],
 })
