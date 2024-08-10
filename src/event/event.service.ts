@@ -42,7 +42,6 @@ export class EventService {
     points.amount -= tapCount;
     ambers.amount += tapCount;
     totalTapped.amount += tapCount;
-    this.assetsService.actualize(player);
     await this.em.flush();
   }
 }
