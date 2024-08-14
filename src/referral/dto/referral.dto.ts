@@ -1,4 +1,4 @@
 export class ReferralDto {
-  username?: string;
+  username: string;
   ambers: number;
 }

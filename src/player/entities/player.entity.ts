@@ -17,7 +17,7 @@ import { Energy } from 'src/assets/entities/energy.entity';
 @Entity({ repository: () => PlayerRepository })
 export class Player extends BaseEntity {
   @Property()
-  username?: string;
+  username: string;
   @OneToOne()
   points: Points;
   @OneToOne()
@@ -27,7 +27,7 @@ export class Player extends BaseEntity {
   @OneToOne()
   totalTapped: TotalTapped;
 
-  constructor(id: number, username?: string) {
+  constructor(id: number, username: string) {
     super(id);
     this.username = username;
   }
