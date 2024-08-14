@@ -25,7 +25,10 @@ export class PlayerService {
     return player;
   }
 
-  async actualize(player: Player, tgInitData?: ParsedTelegramInitData) {
+  async actualizePlayerData(
+    player: Player,
+    tgInitData?: ParsedTelegramInitData,
+  ) {
     if (tgInitData && tgInitData.user.username != player.username) {
       player.username = tgInitData.user.username;
       await this.em.flush();

@@ -16,7 +16,7 @@ export class AssetsService {
     private em: EntityManager,
   ) {}
 
-  actualize({ energy, points, id }: Player) {
+  actualizePlayerAssets({ energy, points, id }: Player) {
     if (!points || !energy) {
       throw new Error(`Player ${id} doesn't have needed asset`);
     }

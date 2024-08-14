@@ -21,7 +21,7 @@ export class AssetsController {
       { id },
       { populate: ['energy', 'points', 'ambers', 'totalTapped'] },
     );
-    this.assetsService.actualize(player);
+    this.assetsService.actualizePlayerAssets(player);
     const { ambers, totalTapped, points, energy } = player;
     return {
       points: points.amount,

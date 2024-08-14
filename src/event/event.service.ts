@@ -28,8 +28,8 @@ export class EventService {
     if (!player) {
       throw new UnauthorizedException('player not found');
     }
-    
-    this.assetsService.actualize(player);
+
+    this.assetsService.actualizePlayerAssets(player);
 
     const { totalTapped, ambers, points } = player;
 

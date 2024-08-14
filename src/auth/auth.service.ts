@@ -18,7 +18,7 @@ export class AuthService {
   async signIn(data: string): Promise<{ access_token: string }> {
     const [player, tgInitData] = await this.signInByTelegramInitData(data);
     if (!player) throw new BadRequestException('Telegram is not registered');
-    await this.playerService.actualize(player, tgInitData);
+    await this.playerService.actualizePlayerData(player, tgInitData);
     const payload = { sub: player.id };
     return { access_token: await this.jwtService.signAsync(payload) };
   }
