@@ -62,7 +62,13 @@ export class TelegramService implements OnApplicationBootstrap {
     return this.bot.botInfo.username;
   }
 
-  private welcome(ctx: CommandContext<Context>) {
+  private informAboutRequiredTelegramUsername(ctx: CommandContext<Context>) {
+    return ctx.reply(
+      'Telegram username is required. Please, set username in telegram settings',
+    );
+  }
+
+  private doWelcome(ctx: CommandContext<Context>) {
     return ctx.reply('Welcome to Ambeaver', {
       reply_markup: {
         inline_keyboard: [
@@ -81,17 +87,20 @@ export class TelegramService implements OnApplicationBootstrap {
 
   @EnsureRequestContext()
   private async start(ctx: CommandContext<Context>) {
+    if (!ctx.from?.username) {
+      return await this.informAboutRequiredTelegramUsername(ctx);
+    }
     const fromId = ctx.from!.id;
     const { ref: refId } = getReferralIdFromMatch(ctx.match);
     if (await this.playerService.isExists(fromId)) {
-      return await this.welcome(ctx);
+      return await this.doWelcome(ctx);
     }
     const referrer = await this.playerService.getPlayerByRefId(Number(refId));
     try {
       await this.em.begin();
       const newPlayer = this.playerService.create({
         id: fromId,
-        username: ctx.from?.username,
+        username: ctx.from.username,
       });
       if (referrer) {
         const isPremiumNewPlayer = Boolean(ctx.from?.is_premium);
@@ -100,7 +109,7 @@ export class TelegramService implements OnApplicationBootstrap {
       }
       await this.em.commit();
       this.logger.log(`New player ${fromId} registered`);
-      await this.welcome(ctx);
+      await this.doWelcome(ctx);
     } catch (error) {
       await this.em.rollback();
       throw error;
