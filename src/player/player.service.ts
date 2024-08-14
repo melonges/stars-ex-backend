@@ -35,6 +35,15 @@ export class PlayerService {
     }
   }
 
+  async getPlayerWithActualizedAssets(id: number): Promise<Player | null> {
+    const player = await this.getPlayer(id, {
+      populate: ['energy', 'points', 'ambers', 'totalTapped'],
+    });
+    if (!player) return null;
+    this.assetsService.actualizePlayerAssets(player);
+    return player;
+  }
+
   getPlayer(
     id: number,
     options?: FindOneOptions<Player, 'ZOV'>,

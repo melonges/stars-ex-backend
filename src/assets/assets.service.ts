@@ -16,7 +16,11 @@ export class AssetsService {
     private em: EntityManager,
   ) {}
 
-  actualizePlayerAssets({ energy, points, id }: Player) {
+  actualizePlayerAssets({
+    energy,
+    points,
+    id,
+  }: Pick<Player, 'energy' | 'points' | 'id'>) {
     if (!points || !energy) {
       throw new Error(`Player ${id} doesn't have needed asset`);
     }

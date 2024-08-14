@@ -7,29 +7,22 @@ import {
 import { TapEventDto } from './dto/tap-event.dto';
 import { EnsureRequestContext } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { PlayerRepository } from 'src/player/player.repository';
-import { AssetsService } from 'src/assets/assets.service';
+import { PlayerService } from 'src/player/player.service';
 
 @Injectable()
 export class EventService {
   constructor(
-    private assetsService: AssetsService,
-    private playerRepository: PlayerRepository,
+    private playerService: PlayerService,
     private em: EntityManager,
   ) {}
 
   @EnsureRequestContext()
   async registerTap(playerId: number, { amount: tapCount }: TapEventDto) {
-    const player = await this.playerRepository.findOne(
-      { id: playerId },
-      { populate: ['points', 'ambers', 'totalTapped', 'energy'] },
-    );
-
+    const player =
+      await this.playerService.getPlayerWithActualizedAssets(playerId);
     if (!player) {
       throw new UnauthorizedException('player not found');
     }
-
-    this.assetsService.actualizePlayerAssets(player);
 
     const { totalTapped, ambers, points } = player;
 

@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { EventService } from './event.service';
 import { EventController } from './event.controller';
-import { Player } from 'src/player/entities/player.entity';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { AssetsModule } from 'src/assets/assets.module';
+import { PlayerModule } from 'src/player/player.module';
 
 @Module({
-  imports: [AssetsModule, MikroOrmModule.forFeature([Player])],
+  imports: [AssetsModule, PlayerModule],
   controllers: [EventController],
   providers: [EventService],
 })

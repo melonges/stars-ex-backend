@@ -36,9 +36,7 @@ export class AuthService {
       throw new BadRequestException("Telegram's hash is expired");
     }
     return [
-      await this.playerService.getPlayer(parsedTgInitData.user.id, {
-        populate: ['points', 'energy'],
-      }),
+      await this.playerService.getPlayer(parsedTgInitData.user.id),
       parsedTgInitData,
     ];
   }
