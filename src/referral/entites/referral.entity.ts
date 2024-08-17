@@ -3,16 +3,13 @@ import {
   EntityRepositoryType,
   ManyToOne,
   OneToOne,
-  PrimaryKey,
 } from '@mikro-orm/core';
 import { Player } from 'src/player/entities/player.entity';
 import { ReferralRepository } from '../referral.repository';
+import { BaseEntity } from 'src/common/base.entity';
 
 @Entity({ repository: () => ReferralRepository })
-export class Referral {
-  @PrimaryKey()
-  id: number;
-
+export class Referral extends BaseEntity {
   @ManyToOne()
   // who refers someone
   referrer: Player;
@@ -22,6 +19,7 @@ export class Referral {
   referee: Player;
 
   constructor(referrer: Player, referee: Player) {
+    super();
     this.referrer = referrer;
     this.referee = referee;
   }
