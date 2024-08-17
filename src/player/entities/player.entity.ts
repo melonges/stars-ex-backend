@@ -16,7 +16,8 @@ import { Energy } from 'src/assets/entities/energy.entity';
 
 @Entity({ repository: () => PlayerRepository })
 export class Player extends BaseEntity {
-  @Property()
+  @Property({ length: 32 })
+  // min 5 max 32
   username: string;
   @OneToOne()
   points: Points;
