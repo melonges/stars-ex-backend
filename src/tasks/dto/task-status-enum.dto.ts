@@ -1,0 +1,5 @@
+export enum TaskStatusEnumDto {
+  FINISHED = 'FINISHED',
+  READY_FOR_CLAIM = 'READY_FOR_CLAIM',
+  NOT_STARTED = 'NOT_STARTED',
+}

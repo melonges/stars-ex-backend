@@ -3,6 +3,7 @@ import { BaseEntity } from 'src/common/base.entity';
 import { Player } from 'src/player/entities/player.entity';
 import { TasksRepository } from '../tasks.repository';
 import { NativeEnumName } from 'src/database/tative-enum-name';
+import { TasksStatusRepository } from '../tasks-status.repository';
 
 @Entity({ repository: () => TasksRepository })
 export class Task extends BaseEntity {
@@ -19,7 +20,7 @@ export class Task extends BaseEntity {
   meta: string;
 }
 
-@Entity()
+@Entity({ repository: () => TasksStatusRepository })
 export class TaskStatus extends BaseEntity {
   @ManyToOne()
   player: Player;
@@ -30,12 +31,11 @@ export class TaskStatus extends BaseEntity {
 }
 
 export enum TaskStatusEnum {
-  FULFILLED = 'fulfilled',
-  CLAIMED = 'claimed',
+  FINISHED = 'FINISHED',
+  READY_FOR_CLAIM = 'READY_FOR_CLAIM',
 }
 
 export enum TaskType {
-  WELCOME = 'welcome',
-  INVITE = 'invite',
-  SUBSCRIBE = 'subscribe',
+  INVITE_FRIENDS = 'INVITE_FRIENDS',
+  SOCIAL_SUBSCRIPTION = 'SOCIAL_SUBSCRIPTION',
 }

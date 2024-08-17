@@ -34,7 +34,8 @@
     "grammy": "^1.27.0",
     "js-yaml": "^4.1.0",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "zod": "^3.23.8"
   },
   "mikro-orm": {
     "useTsNode": true

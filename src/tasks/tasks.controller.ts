@@ -1,54 +1,67 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
-import { TasksService } from './tasks.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { TasksRepository } from './tasks.repository';
+import { Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { PlayerId } from 'src/common/decorators/player-id.decorator';
 import { ApiPaginatedResponse } from 'src/common/swagger/ApiPaginatedResponse';
-import { Task } from './entities/task.entity';
 import {
   PaginatedResponse,
   PaginationDto,
 } from 'src/common/swagger/pagination';
+import { TaskStatusEnumDto } from './dto/task-status-enum.dto';
+import { TaskDto } from './dto/task.dto';
+import { Task } from './entities/task.entity';
+import { TasksStatusRepository } from './tasks-status.repository';
+import { TasksRepository } from './tasks.repository';
+import { TasksService } from './tasks.service';
+import { mapTaskStatusEnumToDto } from './tasks.utils';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Tasks')
 @Controller('tasks')
 export class TasksController {
   constructor(
     private readonly tasksService: TasksService,
     private readonly tasksRepository: TasksRepository,
+    private readonly tasksStatusRepository: TasksStatusRepository,
   ) {}
-
-  @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto);
-  }
 
   @Get()
   @ApiPaginatedResponse(Task)
-  findAll(@Query() options: PaginationDto): Promise<PaginatedResponse<Task>> {
-    return this.tasksRepository.getTasks(options);
+  async findAll(
+    @PlayerId() playerId: number,
+    @Query() options: PaginationDto,
+  ): Promise<PaginatedResponse<TaskDto>> {
+    const tasks = await this.tasksRepository.getTasks(options);
+    const taskStatuses = await Promise.all(
+      tasks.data.map((task) =>
+        this.tasksStatusRepository.getTaskStatus(playerId, task.id),
+      ),
+    );
+    return {
+      data: tasks.data.map((task, index) => ({
+        title: task.title,
+        status: taskStatuses[index]?.status
+          ? mapTaskStatusEnumToDto(taskStatuses[index].status)
+          : TaskStatusEnumDto.NOT_STARTED,
+        rewardInAmbers: task.rewardInAmbers,
+      })),
+      meta: tasks.meta,
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(+id);
+  @ApiBadRequestResponse()
+  @ApiNotFoundResponse()
+  @Post('/start/:id')
+  start(@PlayerId() playerId: number, @Param('id') taskId: number) {
+    return this.tasksService.startTask(playerId, taskId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(+id, updateTaskDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tasksService.remove(+id);
+  @ApiBadRequestResponse()
+  @ApiNotFoundResponse()
+  @Patch('/claim/:id')
+  claim(@PlayerId() playerId: number, @Param('id') taskId: number) {
+    return this.tasksService.claimTask(playerId, taskId);
   }
 }

@@ -6,6 +6,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { RemainingTimeDto } from './dto/remaining-time.dto';
 import { Energy } from './entities/energy.entity';
 import { AssetsRepository } from './assets.repository';
+import { Task } from 'src/tasks/entities/task.entity';
 
 @Injectable()
 export class AssetsService {
@@ -103,6 +104,10 @@ export class AssetsService {
     const { normal: normalReward, premium: premiumReward } =
       this.configService.getOrThrow('referral_rewards', { infer: true });
     referrer.ambers.amount += isPremiumReferee ? premiumReward : normalReward;
+  }
+
+  giveTaskReward(player: Player, task: Task): void {
+    player.ambers.amount += task.rewardInAmbers;
   }
 
   getInitialPlayerAssetsValue() {
