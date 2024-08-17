@@ -7,7 +7,6 @@ import {
 } from 'src/common/swagger/pagination';
 import { TaskStatusEnumDto } from './dto/task-status-enum.dto';
 import { TaskDto } from './dto/task.dto';
-import { Task } from './entities/task.entity';
 import { TasksStatusRepository } from './tasks-status.repository';
 import { TasksRepository } from './tasks.repository';
 import { TasksService } from './tasks.service';
@@ -28,7 +27,7 @@ export class TasksController {
   ) {}
 
   @Get()
-  @ApiPaginatedResponse(Task)
+  @ApiPaginatedResponse(TaskDto)
   async findAll(
     @PlayerId() playerId: number,
     @Query() options: PaginationDto,
