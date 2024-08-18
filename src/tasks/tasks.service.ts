@@ -3,8 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { TasksRepository } from './tasks.repository';
-import { TaskStatusEnum, TaskType } from './entities/task.entity';
+import { Task, TaskStatusEnum, TaskType } from './entities/task.entity';
 import { TaskValidator } from './task.interface';
 import { InviteTaskValidator } from './invite.task';
 import { SubscribeTaskValidator } from './subscribe.task';
@@ -16,40 +15,30 @@ import { Player } from 'src/player/entities/player.entity';
 @Injectable()
 export class TasksService {
   constructor(
-    private tasksRepository: TasksRepository,
     private assetService: AssetsService,
     private tasksStatusRepository: TasksStatusRepository,
     private em: EntityManager,
   ) {}
 
-  async startTask(player: Player, taskId: number) {
+  async checkTaskAndStart(player: Player, task: Task) {
     const taskStatus = await this.tasksStatusRepository.getTaskStatus(
       player,
-      taskId,
+      task.id,
     );
 
     // if task exists it means that task already READY_FOR_CLAIM or FINISHED
-    if (taskStatus) {
-      throw new BadRequestException(`$Task is already ${taskStatus.status}`);
-    }
-
-    const task = await this.tasksRepository.findOne(taskId);
-    if (!task) {
-      throw new NotFoundException();
-    }
+    if (taskStatus) return;
 
     const taskValidator = this.taskTypeToTaskValidator(task.type);
     const isCompletedTask = await taskValidator.validateTask(player, task);
-    if (!isCompletedTask) {
-      throw new BadRequestException();
+    if (isCompletedTask) {
+      const newTaskStatus = this.tasksStatusRepository.create({
+        player,
+        task,
+        status: TaskStatusEnum.READY_FOR_CLAIM,
+      });
+      await this.em.persistAndFlush(newTaskStatus);
     }
-
-    const newTaskStatus = this.tasksStatusRepository.create({
-      player,
-      task,
-      status: TaskStatusEnum.READY_FOR_CLAIM,
-    });
-    await this.em.persistAndFlush(newTaskStatus);
   }
 
   async claimTask(playerId: number, taskId: number) {

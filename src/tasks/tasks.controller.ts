@@ -35,6 +35,11 @@ export class TasksController {
     @Query() options: PaginationDto,
   ): Promise<PaginatedResponse<TaskDto>> {
     const tasks = await this.tasksRepository.getTasks(options);
+    await Promise.all(
+      tasks.data.map((task) =>
+        this.tasksService.checkTaskAndStart(player, task),
+      ),
+    );
     const taskStatuses = await Promise.all(
       tasks.data.map((task) =>
         this.tasksStatusRepository.getTaskStatus(player, task.id),
@@ -50,13 +55,6 @@ export class TasksController {
       })),
       meta: tasks.meta,
     };
-  }
-
-  @ApiBadRequestResponse()
-  @ApiNotFoundResponse()
-  @Post('/start/:id')
-  start(@PlayerEntity() player: Player, @Param('id') taskId: number) {
-    return this.tasksService.startTask(player, taskId);
   }
 
   @ApiBadRequestResponse()
