@@ -3,20 +3,18 @@ import { ConfigService } from '@nestjs/config';
 import { Config } from 'config/types.config';
 import { SettingsDto } from './dto/settings.dto';
 import { AssetsService } from 'src/assets/assets.service';
-import { AssetsRepository } from 'src/assets/assets.repository';
+import { Player } from 'src/player/entities/player.entity';
 
 @Injectable()
 export class SettingsService {
   constructor(
     private readonly configService: ConfigService<Config>,
-    private readonly assetsRepository: AssetsRepository,
     private readonly assetsService: AssetsService,
   ) {}
 
-  async getSettings(playerId: number): Promise<SettingsDto> {
-    const energy = await this.assetsRepository.getEnergy(playerId);
+  async getSettings(player: Player): Promise<SettingsDto> {
     const fullChargePointsCostInEnergy = this.assetsService.getChargePrice(
-      energy!,
+      player.energy,
     );
     const playerLimits = this.configService.getOrThrow('player_limits', {
       infer: true,
