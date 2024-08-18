@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { bootstrapSwagger } from './common/swagger/bootstrap-swagger';
 import { useGlobalPipes } from './common/useGlobalPipes';
+import helmet from '@fastify/helmet';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -16,6 +17,7 @@ async function bootstrap() {
   bootstrapSwagger(app);
   useGlobalPipes(app);
   await bootstrapFastifyCors(app);
+  await app.register(helmet);
   await app.listen(3000, '0.0.0.0');
 }
 bootstrap();
