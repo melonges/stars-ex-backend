@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { TasksRepository } from './tasks.repository';
 import { TaskStatusEnum, TaskType } from './entities/task.entity';
@@ -11,8 +10,8 @@ import { InviteTaskValidator } from './invite.task';
 import { SubscribeTaskValidator } from './subscribe.task';
 import { EntityManager } from '@mikro-orm/core';
 import { AssetsService } from 'src/assets/assets.service';
-import { PlayerRepository } from 'src/player/player.repository';
 import { TasksStatusRepository } from './tasks-status.repository';
+import { Player } from 'src/player/entities/player.entity';
 
 @Injectable()
 export class TasksService {
@@ -20,13 +19,12 @@ export class TasksService {
     private tasksRepository: TasksRepository,
     private assetService: AssetsService,
     private tasksStatusRepository: TasksStatusRepository,
-    private playerRepository: PlayerRepository,
     private em: EntityManager,
   ) {}
 
-  async startTask(playerId: number, taskId: number) {
+  async startTask(player: Player, taskId: number) {
     const taskStatus = await this.tasksStatusRepository.getTaskStatus(
-      playerId,
+      player,
       taskId,
     );
 
@@ -35,15 +33,9 @@ export class TasksService {
       throw new BadRequestException(`$Task is already ${taskStatus.status}`);
     }
 
-    const [player, task] = await Promise.all([
-      this.playerRepository.findOne(playerId),
-      await this.tasksRepository.findOne(taskId),
-    ]);
+    const task = await this.tasksRepository.findOne(taskId);
     if (!task) {
       throw new NotFoundException();
-    }
-    if (!player) {
-      throw new UnauthorizedException();
     }
 
     const taskValidator = this.taskTypeToTaskValidator(task.type);
@@ -52,19 +44,12 @@ export class TasksService {
       throw new BadRequestException();
     }
 
-    try {
-      await this.em.begin();
-      const newTaskStatus = this.tasksStatusRepository.create({
-        player,
-        task,
-        status: TaskStatusEnum.READY_FOR_CLAIM,
-      });
-      this.em.persist(newTaskStatus);
-      await this.em.commit();
-    } catch (error) {
-      await this.em.rollback();
-      throw error;
-    }
+    const newTaskStatus = this.tasksStatusRepository.create({
+      player,
+      task,
+      status: TaskStatusEnum.READY_FOR_CLAIM,
+    });
+    await this.em.persistAndFlush(newTaskStatus);
   }
 
   async claimTask(playerId: number, taskId: number) {

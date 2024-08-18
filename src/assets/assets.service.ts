@@ -7,6 +7,7 @@ import { RemainingTimeDto } from './dto/remaining-time.dto';
 import { Energy } from './entities/energy.entity';
 import { AssetsRepository } from './assets.repository';
 import { Task } from 'src/tasks/entities/task.entity';
+import { Points } from './entities';
 
 @Injectable()
 export class AssetsService {
@@ -44,12 +45,7 @@ export class AssetsService {
     }
   }
 
-  async getTimeToFullEnergy(playerId: number): Promise<RemainingTimeDto> {
-    const energy = await this.assetRepository.getEnergy(playerId);
-    if (!energy) {
-      throw new Error(`Player ${playerId} doesn't have needed asset`);
-    }
-
+  async getTimeToFullEnergy(energy: Energy): Promise<RemainingTimeDto> {
     if (
       energy.amount ==
       this.configService.getOrThrow('player_limits.energy', {
@@ -71,15 +67,7 @@ export class AssetsService {
     };
   }
 
-  async chargePoints(playerId: number) {
-    const [points, energy] = await Promise.all([
-      this.assetRepository.getPoints(playerId),
-      this.assetRepository.getEnergy(playerId),
-    ]);
-    if (!points || !energy) {
-      throw new Error(`Player ${playerId} doesn't have needed asset`);
-    }
-
+  async chargePoints({ energy, points }: { energy: Energy; points: Points }) {
     const chargePrice = this.getChargePrice(energy);
 
     if (energy.amount < chargePrice) {

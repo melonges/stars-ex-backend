@@ -1,35 +1,22 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { TapEventDto } from './dto/tap-event.dto';
 import { EnsureRequestContext } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { PlayerService } from 'src/player/player.service';
+import { Ambers, Points, TotalTapped } from 'src/assets/entities';
 
 @Injectable()
 export class EventService {
-  constructor(
-    private playerService: PlayerService,
-    private em: EntityManager,
-  ) {}
+  constructor(private em: EntityManager) {}
 
   @EnsureRequestContext()
-  async registerTap(playerId: number, { amount: tapCount }: TapEventDto) {
-    const player =
-      await this.playerService.getPlayerWithActualizedAssets(playerId);
-    if (!player) {
-      throw new UnauthorizedException('player not found');
-    }
-
-    const { totalTapped, ambers, points } = player;
-
-    if (!points || !ambers || !totalTapped) {
-      throw new InternalServerErrorException();
-    }
-
+  async registerTap(
+    {
+      totalTapped,
+      points,
+      ambers,
+    }: { points: Points; ambers: Ambers; totalTapped: TotalTapped },
+    { amount: tapCount }: TapEventDto,
+  ) {
     if (points.amount < tapCount) {
       throw new BadRequestException('Not enough points');
     }

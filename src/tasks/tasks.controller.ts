@@ -16,6 +16,8 @@ import {
   ApiNotFoundResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { PlayerEntity } from 'src/common/decorators/player-entity.decorator';
+import { Player } from 'src/player/entities/player.entity';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -29,13 +31,13 @@ export class TasksController {
   @Get()
   @ApiPaginatedResponse(TaskDto)
   async findAll(
-    @PlayerId() playerId: number,
+    @PlayerEntity() player: Player,
     @Query() options: PaginationDto,
   ): Promise<PaginatedResponse<TaskDto>> {
     const tasks = await this.tasksRepository.getTasks(options);
     const taskStatuses = await Promise.all(
       tasks.data.map((task) =>
-        this.tasksStatusRepository.getTaskStatus(playerId, task.id),
+        this.tasksStatusRepository.getTaskStatus(player, task.id),
       ),
     );
     return {
@@ -53,8 +55,8 @@ export class TasksController {
   @ApiBadRequestResponse()
   @ApiNotFoundResponse()
   @Post('/start/:id')
-  start(@PlayerId() playerId: number, @Param('id') taskId: number) {
-    return this.tasksService.startTask(playerId, taskId);
+  start(@PlayerEntity() player: Player, @Param('id') taskId: number) {
+    return this.tasksService.startTask(player, taskId);
   }
 
   @ApiBadRequestResponse()

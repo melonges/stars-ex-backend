@@ -10,6 +10,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ReferralLinkDto } from './dto/referral-link.dto';
 import { ReferralService } from './referral.service';
+import { SkipInjectPlayer } from 'src/auth/decorators/skip-inject-player.decorator';
 
 @ApiBearerAuth()
 @ApiTags('Referral')
@@ -22,6 +23,7 @@ export class ReferralController {
 
   @Get()
   @ApiPaginatedResponse(ReferralDto)
+  @SkipInjectPlayer()
   getReferrals(
     @PlayerId() id: number,
     @Query() options: PaginationDto,
@@ -30,6 +32,7 @@ export class ReferralController {
   }
 
   @Get('link')
+  @SkipInjectPlayer()
   getReferralLink(@PlayerId() id: number): ReferralLinkDto {
     return { link: this.referralService.getReferralLink(id) };
   }

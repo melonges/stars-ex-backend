@@ -10,6 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthConfig } from '../auth.types';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { PlayerService } from 'src/player/player.service';
+import { SHOULD_SKIP_INJECT_PLAYER } from '../decorators/skip-inject-player.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -17,6 +19,7 @@ export class AuthGuard implements CanActivate {
     private jwtService: JwtService,
     private configService: ConfigService<AuthConfig>,
     private reflector: Reflector,
+    private playerService: PlayerService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -37,11 +40,27 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.getOrThrow('JWT_SECRET'),
       });
+
       request['playerId'] = payload.sub;
+
+      const shouldSkipInjectPlayer = this.reflector.getAllAndOverride<boolean>(
+        SHOULD_SKIP_INJECT_PLAYER,
+        [context.getHandler(), context.getClass()],
+      );
+
+      if (shouldSkipInjectPlayer) {
+        return this.playerService.isExists(payload.sub);
+      }
+
+      const player = await this.playerService.getPlayer(payload.sub);
+      if (!player) {
+        return false;
+      }
+      request['player'] = player;
+      return true;
     } catch {
       throw new UnauthorizedException();
     }
-    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
