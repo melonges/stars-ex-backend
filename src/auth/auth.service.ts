@@ -6,6 +6,7 @@ import { TelegramConfig } from 'src/telegram/telegram.types';
 import { Player } from 'src/player/entities/player.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ParsedTelegramInitData } from './auth.types';
+import { EntityManager } from '@mikro-orm/core';
 
 @Injectable()
 export class AuthService {
@@ -13,11 +14,23 @@ export class AuthService {
     private playerService: PlayerService,
     private configService: ConfigService<TelegramConfig>,
     private jwtService: JwtService,
+    private em: EntityManager,
   ) {}
 
   async signIn(data: string): Promise<{ access_token: string }> {
-    const [player, tgInitData] = await this.signInByTelegramInitData(data);
-    if (!player) throw new BadRequestException('Telegram is not registered');
+    let [player, tgInitData] = await this.signInByTelegramInitData(data);
+    if (!player) {
+      if (!tgInitData.user.username) {
+        throw new BadRequestException('Telegram username is required');
+      }
+
+      await this.em.begin();
+      player = this.playerService.create({
+        id: tgInitData.user.id,
+        username: tgInitData.user.username,
+      });
+      await this.em.commit();
+    }
     await this.playerService.actualizePlayerData(player, tgInitData);
     const payload = { sub: player.id };
     return { access_token: await this.jwtService.signAsync(payload) };
