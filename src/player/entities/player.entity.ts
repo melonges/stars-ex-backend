@@ -34,6 +34,9 @@ export class Player extends BaseEntity {
   }
 
   @OneToMany(() => Referral, (referral) => referral.referrer)
+  /**
+   * @description init collection before access
+   */
   referrals = new Collection<Referral>(this);
 
   [EntityRepositoryType]?: PlayerRepository;

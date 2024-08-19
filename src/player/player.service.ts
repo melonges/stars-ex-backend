@@ -46,7 +46,9 @@ export class PlayerService {
 
   getPlayer(
     id: number,
-    options: FindOneOptions<Player, 'ZOV'> = { populate: ['*'] },
+    options: FindOneOptions<Player, 'ZOV'> = {
+      populate: ['points', 'ambers', 'energy', 'totalTapped'],
+    },
   ): Promise<Player | null> {
     return this.em.getRepository(Player).findOne({ id }, options);
   }
