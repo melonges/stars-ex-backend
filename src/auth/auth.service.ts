@@ -18,7 +18,7 @@ export class AuthService {
   ) {}
 
   async signIn(data: string): Promise<{ access_token: string }> {
-    let [player, tgInitData] = await this.signInByTelegramInitData(data);
+    let [player, tgInitData] = await this.signInByTelegramInitData(data); // eslint-disable-line prefer-const
     if (!player) {
       if (!tgInitData.user.username) {
         throw new BadRequestException('Telegram username is required');
