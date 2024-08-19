@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { PlayerEntity } from 'src/common/decorators/player-entity.decorator';
 import { Player } from 'src/player/entities/player.entity';
+import { SkipInjectPlayer } from 'src/auth/decorators/skip-inject-player.decorator';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -37,6 +38,7 @@ export class TasksController {
     const tasks = await this.tasksRepository.getTasks(options);
     await Promise.all(
       tasks.data.map((task) =>
+        // TODO: check only tasks that doesn't have status
         this.tasksService.checkTaskAndStart(player, task),
       ),
     );
@@ -59,8 +61,15 @@ export class TasksController {
 
   @ApiBadRequestResponse()
   @ApiNotFoundResponse()
+  @Post('/start/:id')
+  start(@PlayerEntity() player: Player, @Param('id') taskId: number) {
+    return this.tasksService.startTask(player, taskId);
+  }
+
+  @ApiBadRequestResponse()
+  @ApiNotFoundResponse()
   @Patch('/claim/:id')
-  claim(@PlayerId() playerId: number, @Param('id') taskId: number) {
-    return this.tasksService.claimTask(playerId, taskId);
+  claim(@PlayerEntity() player: Player, @Param('id') taskId: number) {
+    return this.tasksService.claimTask(player, taskId);
   }
 }

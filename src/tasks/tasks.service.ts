@@ -11,12 +11,14 @@ import { EntityManager } from '@mikro-orm/core';
 import { AssetsService } from 'src/assets/assets.service';
 import { TasksStatusRepository } from './tasks-status.repository';
 import { Player } from 'src/player/entities/player.entity';
+import { TasksRepository } from './tasks.repository';
 
 @Injectable()
 export class TasksService {
   constructor(
     private assetService: AssetsService,
     private tasksStatusRepository: TasksStatusRepository,
+    private tasksRepository: TasksRepository,
     private em: EntityManager,
   ) {}
 
@@ -29,25 +31,37 @@ export class TasksService {
     // if task exists it means that task already READY_FOR_CLAIM or FINISHED
     if (taskStatus) return;
 
-    const taskValidator = this.taskTypeToTaskValidator(task.type);
-    const isCompletedTask = await taskValidator.validateTask(player, task);
-    if (isCompletedTask) {
-      const newTaskStatus = this.tasksStatusRepository.create({
-        player,
-        task,
-        status: TaskStatusEnum.READY_FOR_CLAIM,
-      });
-      await this.em.persistAndFlush(newTaskStatus);
+    return this.validateAndCompleteTask(player, task);
+  }
+
+  async startTask(player: Player, taskId: number) {
+    const task = await this.tasksRepository.findOne(taskId);
+    if (!task) {
+      throw new NotFoundException();
+    }
+    const taskStatus = await this.tasksStatusRepository.getTaskStatus(
+      player,
+      taskId,
+    );
+
+    // if task exists it means that task already READY_FOR_CLAIM or FINISHED
+    if (taskStatus) {
+      throw new BadRequestException(`Task is already ${taskStatus.status} `);
+    }
+
+    const result = await this.validateAndCompleteTask(player, task);
+    if (!result) {
+      throw new BadRequestException('Task is not complete');
     }
   }
 
-  async claimTask(playerId: number, taskId: number) {
+  async claimTask(player: Player, taskId: number) {
     const taskStatus = await this.tasksStatusRepository.findOne(
       {
-        id: taskId,
-        player: playerId,
+        task: taskId,
+        player,
       },
-      { populate: ['player', 'player.ambers', 'task'] },
+      { populate: ['task'] },
     );
 
     if (!taskStatus) {
@@ -59,7 +73,7 @@ export class TasksService {
 
     try {
       await this.em.begin();
-      this.assetService.giveTaskReward(taskStatus.player, taskStatus.task);
+      this.assetService.giveTaskReward(player, taskStatus.task);
       taskStatus.status = TaskStatusEnum.FINISHED;
       await this.em.commit();
     } catch (error) {
@@ -75,5 +89,23 @@ export class TasksService {
       case TaskType.SOCIAL_SUBSCRIPTION:
         return new SubscribeTaskValidator();
     }
+  }
+
+  private async validateAndCompleteTask(
+    player: Player,
+    task: Task,
+  ): Promise<boolean> {
+    const taskValidator = this.taskTypeToTaskValidator(task.type);
+    const isCompletedTask = await taskValidator.validateTask(player, task);
+    if (isCompletedTask) {
+      const newTaskStatus = this.tasksStatusRepository.create({
+        player,
+        task,
+        status: TaskStatusEnum.READY_FOR_CLAIM,
+      });
+      await this.em.persistAndFlush(newTaskStatus);
+      return true;
+    }
+    return false;
   }
 }
