@@ -15,6 +15,9 @@ import { TasksRepository } from './tasks.repository';
 
 @Injectable()
 export class TasksService {
+  private readonly unsupportedStartTasksType: ReadonlyArray<TaskType> = [
+    TaskType.INVITE_FRIENDS,
+  ];
   constructor(
     private assetService: AssetsService,
     private tasksStatusRepository: TasksStatusRepository,
@@ -38,6 +41,12 @@ export class TasksService {
     const task = await this.tasksRepository.findOne(taskId);
     if (!task) {
       throw new NotFoundException();
+    }
+
+    if (this.unsupportedStartTasksType.includes(task.type)) {
+      throw new BadRequestException(
+        `Task type ${task.type} is not supported for start`,
+      );
     }
     const taskStatus = await this.tasksStatusRepository.getTaskStatus(
       player,
