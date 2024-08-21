@@ -1,5 +1,4 @@
 import { Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { PlayerId } from 'src/common/decorators/player-id.decorator';
 import { ApiPaginatedResponse } from 'src/common/swagger/ApiPaginatedResponse';
 import {
   PaginatedResponse,
@@ -18,7 +17,6 @@ import {
 } from '@nestjs/swagger';
 import { PlayerEntity } from 'src/common/decorators/player-entity.decorator';
 import { Player } from 'src/player/entities/player.entity';
-import { SkipInjectPlayer } from 'src/auth/decorators/skip-inject-player.decorator';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -50,6 +48,7 @@ export class TasksController {
     return {
       data: tasks.data.map((task, index) => ({
         title: task.title,
+        type: task.type,
         status: taskStatuses[index]?.status
           ? mapTaskStatusEnumToDto(taskStatuses[index].status)
           : TaskStatusEnumDto.NOT_STARTED,
