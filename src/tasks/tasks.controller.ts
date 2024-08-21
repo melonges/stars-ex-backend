@@ -47,6 +47,7 @@ export class TasksController {
     );
     return {
       data: tasks.data.map((task, index) => ({
+        id: task.id.toString(),
         title: task.title,
         type: task.type,
         status: taskStatuses[index]?.status
