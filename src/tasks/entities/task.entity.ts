@@ -17,7 +17,7 @@ export class Task extends BaseEntity {
   /*
    * Meta of task in json
    */
-  meta: string;
+  meta: Record<string, unknown>;
 }
 
 @Entity({ repository: () => TasksStatusRepository })

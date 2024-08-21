@@ -7,7 +7,7 @@ export class InviteTaskValidator implements TaskValidator {
   type = TaskType.INVITE_FRIENDS as const;
   async validateTask(player: Player, task: Task): Promise<boolean> {
     const { amount: neededAmountOfFriends } = TaskMetaParser[this.type].parse(
-      JSON.parse(task.meta),
+      task.meta,
     );
 
     if ((await player.referrals.loadCount()) >= neededAmountOfFriends) {
