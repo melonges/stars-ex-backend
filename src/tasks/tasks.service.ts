@@ -34,7 +34,6 @@ export class TasksService {
     type TaskTuple = [task: Task, taskStatus: TaskStatusEnum | null];
     return tasks.map(async (task) => {
       const taskTuple: TaskTuple = [task, null];
-      if (this.supportsStart.includes(task.type)) return taskTuple;
 
       const taskStatusEntity = await this.tasksStatusRepository.getTaskStatus(
         player,
@@ -46,6 +45,9 @@ export class TasksService {
         taskTuple[1] = taskStatusEntity.status;
         return taskTuple;
       }
+
+      if (this.supportsStart.includes(task.type)) return taskTuple;
+
       const shouldClaim = await this.validateTask(player, task);
       if (!shouldClaim) return taskTuple;
       taskTuple[1] = (await this.completeTask(player, task)).status;
