@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { PlayerEntity } from 'src/common/decorators/player-entity.decorator';
 import { Player } from 'src/player/entities/player.entity';
+import { TaskType } from './entities/task.entity';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -54,6 +55,12 @@ export class TasksController {
           ? mapTaskStatusEnumToDto(taskStatuses[index].status)
           : TaskStatusEnumDto.NOT_STARTED,
         rewardInAmbers: task.rewardInAmbers,
+        meta:
+          task.type === TaskType.SOCIAL_SUBSCRIPTION
+            ? {
+                url: task.meta.link as string,
+              }
+            : undefined,
       })),
       meta: tasks.meta,
     };
