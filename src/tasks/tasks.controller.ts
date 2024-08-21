@@ -18,6 +18,7 @@ import {
 import { PlayerEntity } from 'src/common/decorators/player-entity.decorator';
 import { Player } from 'src/player/entities/player.entity';
 import { TaskType } from './entities/task.entity';
+import { EnsureRequestContext } from '@mikro-orm/core';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -30,16 +31,15 @@ export class TasksController {
 
   @Get()
   @ApiPaginatedResponse(TaskDto)
+  @EnsureRequestContext()
   async findAll(
     @PlayerEntity() player: Player,
     @Query() options: PaginationDto,
   ): Promise<PaginatedResponse<TaskDto>> {
     const tasks = await this.tasksRepository.getTasks(options);
+
     await Promise.all(
-      tasks.data.map((task) =>
-        // TODO: check only tasks that doesn't have status
-        this.tasksService.checkTaskAndStart(player, task),
-      ),
+      this.tasksService.checkTasksOnComplitionAndUpdate(player, tasks.data),
     );
     const taskStatuses = await Promise.all(
       tasks.data.map((task) =>

@@ -15,8 +15,8 @@ import { TasksRepository } from './tasks.repository';
 
 @Injectable()
 export class TasksService {
-  private readonly unsupportedStartTasksType: ReadonlyArray<TaskType> = [
-    TaskType.INVITE_FRIENDS,
+  private readonly supportsStart: ReadonlyArray<TaskType> = [
+    TaskType.SOCIAL_SUBSCRIPTION,
   ];
   constructor(
     private assetService: AssetsService,
@@ -25,27 +25,33 @@ export class TasksService {
     private em: EntityManager,
   ) {}
 
-  async checkTaskAndStart(player: Player, task: Task) {
-    const taskStatus = await this.tasksStatusRepository.getTaskStatus(
-      player,
-      task.id,
-    );
+  checkTasksOnComplitionAndUpdate(
+    player: Player,
+    tasks: Task[],
+  ): Promise<void>[] {
+    return tasks.map(async (task) => {
+      if (this.supportsStart.includes(task.type)) return;
 
-    // if task exists it means that task already READY_FOR_CLAIM or FINISHED
-    if (taskStatus) return;
+      const isTaskStatusExists =
+        await this.tasksStatusRepository.isTaskStatusExists(player, task.id);
 
-    return this.validateAndCompleteTask(player, task);
+      // if task exists it means that task already READY_FOR_CLAIM or FINISHED
+      if (isTaskStatusExists) return;
+      const shouldClaim = await this.validateTask(player, task);
+      if (!shouldClaim) return;
+      return this.completeTask(player, task);
+    });
   }
 
-  async startTask(player: Player, taskId: number) {
+  async startTask(player: Player, taskId: number): Promise<void> {
     const task = await this.tasksRepository.findOne(taskId);
     if (!task) {
       throw new NotFoundException();
     }
 
-    if (this.unsupportedStartTasksType.includes(task.type)) {
+    if (!this.supportsStart.includes(task.type)) {
       throw new BadRequestException(
-        `Task type ${task.type} is not supported for start`,
+        `Task type ${task.type} is not supports start`,
       );
     }
     const taskStatus = await this.tasksStatusRepository.getTaskStatus(
@@ -58,10 +64,11 @@ export class TasksService {
       throw new BadRequestException(`Task is already ${taskStatus.status} `);
     }
 
-    const result = await this.validateAndCompleteTask(player, task);
+    const result = await this.validateTask(player, task);
     if (!result) {
       throw new BadRequestException('Task is not complete');
     }
+    return this.completeTask(player, task);
   }
 
   async claimTask(player: Player, taskId: number) {
@@ -100,21 +107,17 @@ export class TasksService {
     }
   }
 
-  private async validateAndCompleteTask(
-    player: Player,
-    task: Task,
-  ): Promise<boolean> {
+  private validateTask(player: Player, task: Task): Promise<boolean> {
     const taskValidator = this.taskTypeToTaskValidator(task.type);
-    const isCompletedTask = await taskValidator.validateTask(player, task);
-    if (isCompletedTask) {
-      const newTaskStatus = this.tasksStatusRepository.create({
-        player,
-        task,
-        status: TaskStatusEnum.READY_FOR_CLAIM,
-      });
-      await this.em.persistAndFlush(newTaskStatus);
-      return true;
-    }
-    return false;
+    return taskValidator.validateTask(player, task);
+  }
+
+  private completeTask(player: Player, task: Task): Promise<void> {
+    const newTaskStatus = this.tasksStatusRepository.create({
+      player,
+      task,
+      status: TaskStatusEnum.READY_FOR_CLAIM,
+    });
+    return this.em.persistAndFlush(newTaskStatus);
   }
 }
