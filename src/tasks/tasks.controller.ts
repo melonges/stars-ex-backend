@@ -6,7 +6,6 @@ import {
 } from 'src/common/swagger/pagination';
 import { TaskStatusEnumDto } from './dto/task-status-enum.dto';
 import { TaskDto } from './dto/task.dto';
-import { TasksStatusRepository } from './tasks-status.repository';
 import { TasksRepository } from './tasks.repository';
 import { TasksService } from './tasks.service';
 import { mapTaskStatusEnumToDto } from './tasks.utils';
@@ -26,7 +25,6 @@ export class TasksController {
   constructor(
     private readonly tasksService: TasksService,
     private readonly tasksRepository: TasksRepository,
-    private readonly tasksStatusRepository: TasksStatusRepository,
   ) {}
 
   @Get()
@@ -36,23 +34,18 @@ export class TasksController {
     @PlayerEntity() player: Player,
     @Query() options: PaginationDto,
   ): Promise<PaginatedResponse<TaskDto>> {
-    const tasks = await this.tasksRepository.getTasks(options);
-
-    await Promise.all(
-      this.tasksService.checkTasksOnComplitionAndUpdate(player, tasks.data),
-    );
-    const taskStatuses = await Promise.all(
-      tasks.data.map((task) =>
-        this.tasksStatusRepository.getTaskStatus(player, task.id),
-      ),
+    const { data: tasks, meta: tasksMeta } =
+      await this.tasksRepository.getTasks(options);
+    const arrayOfTaskStatusTuple = await Promise.all(
+      this.tasksService.checkTasksOnComplitionAndUpdate(player, tasks),
     );
     return {
-      data: tasks.data.map((task, index) => ({
+      data: arrayOfTaskStatusTuple.map(([task, status]) => ({
         id: task.id.toString(),
         title: task.title,
         type: task.type,
-        status: taskStatuses[index]?.status
-          ? mapTaskStatusEnumToDto(taskStatuses[index].status)
+        status: status
+          ? mapTaskStatusEnumToDto(status)
           : TaskStatusEnumDto.NOT_STARTED,
         rewardInAmbers: task.rewardInAmbers,
         meta:
@@ -62,7 +55,7 @@ export class TasksController {
               }
             : undefined,
       })),
-      meta: tasks.meta,
+      meta: tasksMeta,
     };
   }
 

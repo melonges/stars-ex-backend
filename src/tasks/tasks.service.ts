@@ -3,7 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Task, TaskStatusEnum, TaskType } from './entities/task.entity';
+import {
+  Task,
+  TaskStatus,
+  TaskStatusEnum,
+  TaskType,
+} from './entities/task.entity';
 import { TaskValidator } from './task.interface';
 import { InviteTaskValidator } from './invite.task';
 import { SubscribeTaskValidator } from './subscribe.task';
@@ -15,7 +20,7 @@ import { TasksRepository } from './tasks.repository';
 
 @Injectable()
 export class TasksService {
-  private readonly supportsStart: ReadonlyArray<TaskType> = [
+  readonly supportsStart: ReadonlyArray<TaskType> = [
     TaskType.SOCIAL_SUBSCRIPTION,
   ];
   constructor(
@@ -25,25 +30,30 @@ export class TasksService {
     private em: EntityManager,
   ) {}
 
-  checkTasksOnComplitionAndUpdate(
-    player: Player,
-    tasks: Task[],
-  ): Promise<void>[] {
+  checkTasksOnComplitionAndUpdate(player: Player, tasks: Task[]) {
+    type TaskTuple = [task: Task, taskStatus: TaskStatusEnum | null];
     return tasks.map(async (task) => {
-      if (this.supportsStart.includes(task.type)) return;
+      const taskTuple: TaskTuple = [task, null];
+      if (this.supportsStart.includes(task.type)) return taskTuple;
 
-      const isTaskStatusExists =
-        await this.tasksStatusRepository.isTaskStatusExists(player, task.id);
+      const taskStatusEntity = await this.tasksStatusRepository.getTaskStatus(
+        player,
+        task.id,
+      );
 
       // if task exists it means that task already READY_FOR_CLAIM or FINISHED
-      if (isTaskStatusExists) return;
+      if (taskStatusEntity) {
+        taskTuple[1] = taskStatusEntity.status;
+        return taskTuple;
+      }
       const shouldClaim = await this.validateTask(player, task);
-      if (!shouldClaim) return;
-      return this.completeTask(player, task);
+      if (!shouldClaim) return taskTuple;
+      taskTuple[1] = (await this.completeTask(player, task)).status;
+      return taskTuple;
     });
   }
 
-  async startTask(player: Player, taskId: number): Promise<void> {
+  async startTask(player: Player, taskId: number): Promise<TaskStatus> {
     const task = await this.tasksRepository.findOne(taskId);
     if (!task) {
       throw new NotFoundException();
@@ -112,12 +122,13 @@ export class TasksService {
     return taskValidator.validateTask(player, task);
   }
 
-  private completeTask(player: Player, task: Task): Promise<void> {
+  private async completeTask(player: Player, task: Task): Promise<TaskStatus> {
     const newTaskStatus = this.tasksStatusRepository.create({
       player,
       task,
       status: TaskStatusEnum.READY_FOR_CLAIM,
     });
-    return this.em.persistAndFlush(newTaskStatus);
+    await this.em.persistAndFlush(newTaskStatus);
+    return newTaskStatus;
   }
 }
