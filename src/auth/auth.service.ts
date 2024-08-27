@@ -53,4 +53,8 @@ export class AuthService {
       parsedTgInitData,
     ];
   }
+
+  generateDevJwt(id: number) {
+    return this.jwtService.signAsync({ sub: id });
+  }
 }
