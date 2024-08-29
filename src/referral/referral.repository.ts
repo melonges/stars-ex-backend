@@ -20,8 +20,8 @@ export class ReferralRepository extends EntityRepository<Referral> {
       Referral,
       { referrer: { id: playerId } },
       {
-        populate: ['referee.username', 'referee.ambers'],
-        fields: ['referee'],
+        populate: ['referee.username', 'referee.ambers', 'referee.referrals'],
+        fields: ['referee.username', 'referee.ambers', 'referee.referrals'],
         limit: options.perPage,
         offset: options.page * options.perPage,
       },
@@ -30,6 +30,7 @@ export class ReferralRepository extends EntityRepository<Referral> {
       data: referrer.map(({ referee }) => ({
         username: referee.username,
         ambers: referee.ambers.amount,
+        invited: referee.referrals.count(),
       })),
       meta: {
         page: options.page,
