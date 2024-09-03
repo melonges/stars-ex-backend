@@ -52,7 +52,9 @@ export class AuthGuard implements CanActivate {
         return this.playerService.isExists(payload.sub);
       }
 
-      const player = await this.playerService.getPlayer(payload.sub);
+      const player = await this.playerService.getPlayerWithActualizedAssets(
+        payload.sub,
+      );
       if (!player) {
         return false;
       }
