@@ -29,7 +29,7 @@ export class AuthController {
   }
 
   @Public()
-  @ApiExcludeEndpoint()
+  @ApiExcludeEndpoint(process.env.NODE_ENV !== 'development')
   @Get('generateDevJwt/:id')
   generateDevJwt(@Param('id') id: number) {
     if (process.env.NODE_ENV === 'development') {
