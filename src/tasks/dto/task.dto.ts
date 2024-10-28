@@ -9,6 +9,7 @@ export class SocialSubscriptionMetaTaskDto {
 export class TaskDto {
   id: string;
   title: string;
+  icon: string;
   type: TaskType;
   rewardInAmbers: number;
   status: TaskStatusEnumDto;

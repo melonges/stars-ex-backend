@@ -10,6 +10,8 @@ export class Task extends BaseEntity {
   @Property()
   title: string;
   @Property()
+  icon: string;
+  @Property()
   rewardInAmbers: number;
   @Enum({ items: () => TaskType, nativeEnumName: NativeEnumName.TASK_TYPE })
   type: TaskType;

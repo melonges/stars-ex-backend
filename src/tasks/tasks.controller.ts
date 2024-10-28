@@ -42,6 +42,7 @@ export class TasksController {
     return {
       data: arrayOfTaskStatusTuple.map(([task, status]) => ({
         id: task.id.toString(),
+        icon: task.icon,
         title: task.title,
         type: task.type,
         status: status
